@@ -12,7 +12,7 @@ List Nama:
 ## 1. Deskripsi Aplikasi dan jenis pengguna
 Deskripsi Aplikasi: platform yang membantu pengguna menemukan rekomendasi tempat olahraga, baik yang berbayar maupun gratis (misalnya track lari, gym, atau lapangan olahraga) di wilayah Jabodetabek. Pengguna dapat memfilter tempat berdasarkan cabang olahraga dan lokasi, menyimpan tempat favorit ke wishlist, serta melihat tempat populer (Hot Places) dan promosi (Hot Deals). Tujuan aplikasi ini adalah mempermudah masyarakat untuk menemukan sarana olahraga sesuai kebutuhan dan preferensi mereka. 
 
-Jenis pengguna: User – ditargetkan pada sebagian besar Sport Enthusiast
+Jenis pengguna: User – ditargetkan pada sebagian besar Sport Enthusiast.
 User ini adalah individu yang tertarik dengan aktivitas olahraga dan ingin menemukan tempat olahraga di sekitar wilayah mereka. Mereka butuh referensi tempat yang bervariasi, baik yang berbayar maupun gratis, serta memanfaatkan fitur-fitur berikut untuk memilih lokasi olahraga yang sesuai dengan preferensi mereka:
 - Filter berdasarkan cabang olahraga dan lokasi
 - Menyimpan tempat favorit ke wishlist
@@ -44,7 +44,7 @@ User ini adalah individu yang tertarik dengan aktivitas olahraga dan ingin menem
 
 * **Place Card**: `name`, `sport`, `location (region/area)`, **likes_count**, `price` (atau **Free**), `description`.
 
-> ✅ **Acceptance Checklist**
+> ✅ **Acceptance Checklist*
 >
 > * [ ] Filter sport/region & sorting berjalan
 > * [ ] Hot Places & Hot Deals tampil di Home
