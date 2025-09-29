@@ -10,7 +10,7 @@ List Nama:
 - Marvel Irawan 2406421346
 
 ## 1. Deskripsi Aplikasi dan jenis pengguna
-Deskripsi Aplikasi: platform yang membantu pengguna menemukan rekomendasi tempat olahraga, baik yang berbayar maupun gratis (misalnya track lari, gym, atau lapangan olahraga) di wilayah Jabodetabek. Pengguna dapat memfilter tempat berdasarkan cabang olahraga dan lokasi, menyimpan tempat favorit ke wishlist, serta melihat tempat populer (Hot Places) dan promosi (Hot Deals). Tujuan aplikasi ini adalah mempermudah masyarakat untuk menemukan sarana olahraga sesuai kebutuhan dan preferensi mereka. 
+Deskripsi Aplikasi: platform yang membantu pengguna menemukan rekomendasi tempat olahraga, baik yang berbayar maupun gratis (misalnya track lari, gym, atau lapangan olahraga) di wilayah Jabodetabek. Pengguna dapat memfilter tempat berdasarkan cabang olahraga dan lokasi, menyimpan tempat favorit ke wishlist, serta melihat tempat populer (Hot Places) dan promosi (Hot Deals). Tujuan aplikasi ini adalah mempermudah masyarakat untuk menemukan sarana olahraga sesuai kebutuhan dan preferensi mereka serta mencari dan melakukan appointment  personal trainer/coach (fitur tambahan)
 
 Jenis pengguna: User – ditargetkan pada sebagian besar Sport Enthusiast.
 User ini adalah individu yang tertarik dengan aktivitas olahraga dan ingin menemukan tempat olahraga di sekitar wilayah mereka. Mereka butuh referensi tempat yang bervariasi, baik yang berbayar maupun gratis, serta memanfaatkan fitur-fitur berikut untuk memilih lokasi olahraga yang sesuai dengan preferensi mereka:
@@ -18,6 +18,8 @@ User ini adalah individu yang tertarik dengan aktivitas olahraga dan ingin menem
 - Menyimpan tempat favorit ke wishlist
 - Memberikan review dan likes pada tempat olahraga
 - Melihat tempat populer (Hot Places) dan promosi (Hot Deals)
+- Melakukan appointment  personal trainer/coach (fitur tambahan)
+
 
 
 ## 2. Daftar Modul / Fitur (sesuai diagram)
