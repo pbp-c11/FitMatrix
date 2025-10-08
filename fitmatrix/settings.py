@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-bqj8%@ddi%2e5+6e#uky(+d!hs7+u61qu)!oon4cm3eyn3mhtq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Added ALLOWED_HOSTS for PWS
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "fadhil-daffa-fitmatrix.pbp.cs.ui.ac.id"]
 
 
 # Application definition
