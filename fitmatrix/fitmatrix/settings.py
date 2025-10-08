@@ -31,6 +31,7 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Added ALLOWED_HOSTS for PWS
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "fadhil-daffa-fitmatrix.pbp.cs.ui.ac.id"]
 
 
