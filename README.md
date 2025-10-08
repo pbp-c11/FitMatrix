@@ -150,86 +150,17 @@ https://www.figma.com/design/vXSH1mwzy0O4ozmXNNKxCT/FitMatrix?node-id=0-1&t=0Lne
 password: olahega
 
 Link deployment PWS:
+https://fadhil-daffa-fitmatrix.pbp.cs.ui.ac.id/
+
 
 Initial dataset: 
 
 
-### A. Browsing & Discovery
 
-* **All Places**: daftar semua tempat (pagination).
-* **Filter & Sort**
-  Filter: `sport`, `region` (+ `area` opsional), `is_paid` (Free/Paid).
-  Sort: terbaru / **likes terbanyak**.
-* **Hot Places**: `Place.get_hot_places()` (annotate `likes_count`, order by `-likes_count`).
-* **Hot Deals** (berbayar): daftar promo aktif di beranda (lihat `HotDeal.get_active_deals()`).
 
-### B. Interaksi Pengguna (Login Required)
 
-* **Likes**: relasi **ManyToMany** `Place <-> UserProfile`. Satu like per user per place.
-  Helper: `user.has_liked(place)`.
-* **Wishlist**: model penghubung `WishlistItem(user, place)`
-  Helper: `user.get_wishlist_items()`, `WishlistItem.add_to_wishlist()`, `remove_from_wishlist()`.
-* **Reviews**: `Review(user, place, rating 1–5, comment)`
-  Helper: `Review.submit_review(form_data)`.
 
-### C. Presentasi Data
 
-* **Place Card**: `name`, `sport`, `location (region/area)`, **likes_count**, `price` (atau **Free**), `description`.
-
-> ✅ **Acceptance Checklist*
->
-> * [ ] Filter sport/region & sorting berjalan
-> * [ ] Hot Places & Hot Deals tampil di Home
-> * [ ] Like unik per user; counter tampil sebagai `likes_count`
-> * [ ] Review CRUD (user hanya bisa ubah/hapus miliknya)
-> * [ ] Wishlist page milik user
-
-## 3. Initial Dataset (Seed)
-
-> Simpan file di `/seed`. Untuk **likes** gunakan array `liked_by` (list user id); di runtime hitung `likes_count = len(liked_by)`.
-
-### 3.1 Skema Ringkas (mengikuti diagram)
-
-* **UserProfile**
-
-  * `user` (OneToOne → Django User)
-  * `location_preference` (choices: `Jakarta|Bogor|Depok|Tangerang|Bekasi`, blank=True)
-  * `preferred_sports` (ArrayField/String list; contoh: `["Lari","Gym"]`, blank=True)
-  * `created_at`, `updated_at` (timestamps)
-
-* **Place**
-
-  * `id` (AutoField, pk)
-  * `name` (str, max 255, indexed)
-  * `location.region` (choice: J/B/D/T/B, indexed)
-  * `area` (str, optional)
-  * `category` / `sport` (choice: `Running|Futsal|Basketball|Swimming|Badminton|Gym|Others`)
-  * `is_paid` (bool), `price_min`, `price_max` (Decimal | null)
-  * `description` (Text)
-  * `image_url` (URLField/ImageField, optional)
-  * `likes` (M2M → UserProfile, related name `liked_places`)
-  * **Class/Query helpers**: `get_likes_count()`, `filter_by_location()`, `filter_by_category()`, `get_hot_places()`
-
-* **WishlistItem**
-
-  * `id` (AutoField)
-  * `user` (FK → UserProfile, `related_name="wishlist_items"`)
-  * `place` (FK → Place, `related_name="wishlisted_by"`)
-  * `added_at` (DateTime)
-
-* **Review**
-
-  * `id` (AutoField)
-  * `user` (FK → UserProfile)
-  * `place` (FK → Place, `related_name="reviews"`)
-  * `rating` (Integer 1..5, choices)
-  * `comment` (Text)
-  * `created_at` (DateTime)
-
-* **HotDeal**
-
-  * `id` (AutoField)
-  * `place` (FK → Place, hanya untuk `is_paid=True`, `related_name="deals"`)
 
 
 
