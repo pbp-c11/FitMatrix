@@ -154,6 +154,7 @@ https://fadhil-daffa-fitmatrix.pbp.cs.ui.ac.id/
 
 
 Initial dataset: 
+https://huggingface.co/datasets/Shiowo2/Initial-Data-FitMatrix
 
 
 
