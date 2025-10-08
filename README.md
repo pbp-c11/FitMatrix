@@ -30,7 +30,7 @@ User ini adalah individu yang tertarik dengan aktivitas olahraga dan ingin menem
 
 ## 2. Daftar Modul / Fitur (sesuai diagram)
 
-a) Auth & Profile (Modul Autentikasi dan Profil Pengguna)
+1.  Auth & Profile (Modul Autentikasi dan Profil Pengguna)
 
 Fungsi: Modul ini mengelola registrasi, login, dan profil pengguna. Pengguna dapat mengelola data pribadi mereka, serta mengakses fitur-fitur lain seperti wishlist dan review.
 
@@ -69,25 +69,17 @@ Fitur Utama:
 - Menyimpan data tempat olahraga (lokasi, isFree(tempat ini berbayar atau gratis), fasilitas, deskripsi, harga jika berbayar).
 
 - Menyediakan peta lokasi dan jam operasional (range waktu dari buka sampe tutup).
-
-Integrasi: Terkoneksi dengan Search, Wishlist, dan Review.
-
-
-4. Hot Places (Modul Tempat Populer)
-
-Fungsi: Menampilkan tempat olahraga yang paling populer berdasarkan rating rata-rata dan likes terbanyak.
-
-Fitur Utama:
-
+  
+- Menampilkan tempat olahraga yang paling populer berdasarkan rating rata-rata dan likes terbanyak.
+  
 - Tempat dengan rating tertinggi dan likes terbanyak ditampilkan sebagai Hot Places.
 
 - Filter berdasarkan rating dan menampilkan tempat populer.
 
-Integrasi: Terkoneksi dengan Place, Search, dan Hot Deals.
+Integrasi: Terkoneksi dengan Search, Wishlist, dan Review, Place, Search, dan Hot Deals.
 
 
-
-5. Wishlist (Modul Daftar Favorit)
+4. Wishlist (Modul Daftar Favorit)
 
 Fungsi: Mengizinkan pengguna untuk menyimpan tempat olahraga favorit mereka agar dapat dengan mudah diakses di kemudian hari.
 
@@ -100,7 +92,7 @@ Fitur Utama:
 Integrasi: Terkoneksi dengan Place dan Auth & Profile.
 
 
-6. Review (Modul Ulasan dan Rating)
+5. Review (Modul Ulasan dan Rating)
 
 Fungsi: Pengguna dapat memberikan rating dan review pada tempat olahraga yang mereka kunjungi untuk membantu pengguna lain dalam memilih tempat terbaik.
 
@@ -113,6 +105,44 @@ Fitur Utama:
 - Admin dapat mengelola review yang tidak sesuai.
 
 Integrasi: Terkoneksi dengan Place dan Auth & Profile.
+
+
+6. Trainer Booking (Modul Pemesanan Trainer)
+
+Fungsi:
+Memungkinkan pengguna untuk melihat daftar trainer, melakukan booking sesi olahraga, dan mengelola jadwal sesi. Admin dapat memonitor dan mengatur booking serta jadwal trainer.
+
+Fitur Utama per Role
+
+A. User (Pengguna Biasa)
+
+Melihat daftar trainer beserta spesialisasi, rating, dan jadwal tersedia.
+
+Memilih tanggal, jam, durasi, dan jenis latihan untuk sesi training.
+
+Membuat, mengubah, atau membatalkan booking sesi mereka sendiri.
+
+Menyimpan riwayat booking (status: pending, selesai, dibatalkan).
+
+Memberikan review dan rating untuk trainer setelah sesi selesai.
+
+B. Admin
+
+Melihat seluruh booking yang dibuat oleh user.
+
+Mengatur jadwal trainer (menambah slot baru, mengubah atau menonaktifkan slot).
+
+Membatalkan booking jika ada konflik atau masalah.
+
+Memantau dan mengelola review yang diberikan user.
+
+Integrasi
+
+Auth & Profile: untuk identifikasi pengguna dan akses sesuai role.
+
+Review: untuk menampilkan dan mengelola rating/trainer feedback.
+
+Place / Search: jika sesi dilakukan di lokasi tertentu (misal gym atau lapangan tertentu).
 
 
 Link Figma: 
