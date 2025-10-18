@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Session Slot · FitMatrix Admin{% endblock %}
+{% block content %}
+<section class="max-w-[1200px] mx-auto px-4 sm:px-6 py-12">
+  <div class="glass card max-w-2xl mx-auto space-y-6">
+    <h1 class="text-3xl font-semibold">{% if slot %}Edit{% else %}Create{% endif %} slot</h1>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="block text-sm font-medium">{{ field.label }}</label>
+          {{ field.as_widget(attrs={"class": "input"}) }}
+          {% if field.help_text %}<p class="text-xs text-white/60">{{ field.help_text }}</p>{% endif %}
+          {% for error in field.errors %}<p class="text-rose-300 text-sm">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+      <div class="flex gap-3">
+        <button type="submit" class="btn-primary">Save</button>
+        <a href="{% url 'admin-slots' %}" class="btn glass border border-white/20">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

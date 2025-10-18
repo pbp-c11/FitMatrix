@@ -1,134 +1,71 @@
-# README.md TK PBP C11
+# FitMatrix
 
-# Daftar Anggota Kelompok TK-PBP C11
-List Nama:
-- Dhea Anggrayningsih Syah Rony 2406437262 - Modul Review
-- Gregorius Ega Aditama Sudjali 2406434153 - Modul Authentication
-- kanayra maritza sanika adeeva 2406437880 - Modul Wishlist
-- Kalfin Jefwin Setiawan Gultom 2406360256 - Modul Trainer Booking
-- Fadhil Daffa Putra Irawan 2406438271 - Modul Places
-- Marvel Irawan 2406421346 - Modul Search
+FitMatrix is a Django 5 application for managing fitness places, trainers, and personalized scheduling. The project ships with a glasmorphism-inspired interface and role-based dashboards for members and administrators.
 
-## 1. Deskripsi Aplikasi 
-Nama Aplikasi : FitMatrix
-Deskripsi Aplikasi: platform yang membantu pengguna menemukan rekomendasi tempat olahraga, baik yang berbayar maupun gratis (misalnya track lari, gym, atau lapangan olahraga) di wilayah Jabodetabek. Pengguna dapat memfilter tempat berdasarkan cabang olahraga dan lokasi, menyimpan tempat favorit ke wishlist, serta melihat tempat populer (Hot Places) dan promosi (Hot Deals). Tujuan aplikasi ini adalah mempermudah masyarakat untuk menemukan sarana olahraga sesuai kebutuhan dan preferensi mereka serta mencari dan melakukan appointment  personal trainer/coach (fitur tambahan).
+## Setup
 
-Jenis pengguna: 
-1. User(biasa) – ditargetkan pada sebagian besar Sport Enthusiast.
-User ini adalah individu yang tertarik dengan aktivitas olahraga dan ingin menemukan tempat olahraga di sekitar wilayah mereka. Mereka butuh referensi tempat yang bervariasi, baik yang berbayar maupun gratis, serta memanfaatkan fitur-fitur berikut untuk memilih lokasi olahraga yang sesuai dengan preferensi mereka:
-- Filter berdasarkan cabang olahraga dan lokasi
-- Menyimpan tempat favorit ke wishlist
-- Memberikan review dan likes pada tempat olahraga
-- Melihat tempat populer (Hot Places) dan promosi (Hot Deals)
-- Melakukan appointment  personal trainer/coach (fitur tambahan)
+1. Create a virtual environment and install dependencies:
 
-2. Admin
-- Menambah daftar lokasi spot olahraga dan personal trainer/coach di Jabodetabek
-- Bisa mengedit dan mendelete lokasi spot olahraga dan personal trainer/coach
-- Cancel appointment PT/coach
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
+2. Apply database migrations:
 
-## 2. Daftar Modul / Fitur (sesuai diagram)
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
 
-1.  Auth & Profile (Modul Autentikasi dan Profil Pengguna)
-Fungsi: Modul ini mengelola registrasi, login, dan profil pengguna. Pengguna dapat mengelola data pribadi mereka, serta mengakses fitur-fitur lain seperti wishlist dan review.
+3. Seed demo data (optional but recommended):
 
-Fitur Utama:
-- Registrasi, login, dan pengelolaan akun.
-- Mengelola profile pengguna (nama, foto profile, password)
-- Menyimpan riwayat aktivitas pengguna (seperti appointment saat itu, histori appointments, wishlist, rating).
+```bash
+python manage.py seed_demo
+```
 
-Integrasi: Terkoneksi dengan modul Wishlist, Review, dan Appointment.
+4. Run the development server:
 
+```bash
+python manage.py runserver
+```
 
-2. Search (Modul Pencarian)
-Fungsi: Menyediakan fitur pencarian untuk menemukan tempat olahraga berdasarkan kategori olahraga, lokasi, berbayar/gratis.
+## Demo accounts
 
-Fitur Utama:
-- Pencarian berdasarkan kata kunci.
-- Filter berdasarkan olahraga, lokasi, dan harga (berbayar atau gratis).
-- Menyortir hasil pencarian berdasarkan likes terbanyak.
-  
-Integrasi: Terkoneksi dengan modul Place dan Hot Deals.
+* **Admin** – `admin@fitmatrix.test` / `Admin123!`
+* **Members** – `budi@fitmatrix.test`, `sri@fitmatrix.test`, `andika@fitmatrix.test`, `ayu@fitmatrix.test`, `rudi@fitmatrix.test`, `intan@fitmatrix.test`, `dimas@fitmatrix.test`, `melati@fitmatrix.test` (all use password `User12345!`).
 
+## Routes overview
 
-3. Place (Modul Tempat Olahraga)
-Fungsi: Mengelola data tempat olahraga seperti gym, lapangan futsal, atau track lari, dan menampilkan rincian informasi tempat.
+| Path | Description |
+| --- | --- |
+| `/` | Landing page |
+| `/accounts/register/` | Member registration |
+| `/accounts/login/` | Email/username login |
+| `/accounts/profile/` | Profile dashboard with account, security, history, and wishlist tabs |
+| `/accounts/profile/edit/` | Edit profile details |
+| `/accounts/password/` | Change password |
+| `/accounts/history/` | Paginated activity log |
+| `/accounts/wishlist/` | Wishlist overview |
+| `/accounts/wishlist/toggle/<kind>/<pk>/` | Add/remove wishlist items (AJAX) |
+| `/places/` | Browse places |
+| `/scheduling/` | Upcoming sessions |
+| `/reviews/` | Member reviews |
+| `/admin/console/` | Admin dashboard (role ADMIN) |
+| `/admin/slots/` | Manage session slots |
+| `/admin/bookings/` | View and cancel bookings |
+| `/admin/reviews/` | Moderate reviews |
+| `/django-admin/` | Django admin console |
 
-Fitur Utama:
-- Menyimpan data tempat olahraga (lokasi, isFree(tempat ini berbayar atau gratis), fasilitas, deskripsi, harga jika berbayar).
-- Menyediakan peta lokasi dan jam operasional (range waktu dari buka sampe tutup).
-- Menampilkan tempat olahraga yang paling populer berdasarkan rating rata-rata dan likes terbanyak.
-- Tempat dengan rating tertinggi dan likes terbanyak ditampilkan sebagai Hot Places.
-- Filter berdasarkan rating dan menampilkan tempat populer.
+## Media
 
-Integrasi: Terkoneksi dengan Search, Wishlist, dan Review, Place, Search, dan Hot Deals.
+User avatars are stored in `/media/avatars/`. Demo seed data also references placeholder SVG avatars stored under `accounts/static/demo/avatars/` (kept text-based for easy diffs and to avoid binary blobs in the repo).
 
+## Testing
 
-4. Wishlist (Modul Daftar Favorit)
-Fungsi: Mengizinkan pengguna untuk menyimpan tempat olahraga favorit mereka agar dapat dengan mudah diakses di kemudian hari.
+Run the automated test suite with:
 
-Fitur Utama:
-- Menyimpan dan menghapus tempat dari wishlist.
-- Menampilkan daftar tempat yang telah disimpan oleh pengguna.
-  
-Integrasi: Terkoneksi dengan Place dan Auth & Profile.
-
-
-5. Review (Modul Ulasan dan Rating)
-Fungsi: Pengguna dapat memberikan rating dan review pada tempat olahraga yang mereka kunjungi untuk membantu pengguna lain dalam memilih tempat terbaik.
-
-Fitur Utama:
-- Memberikan rating (1-5) dan komentar untuk tempat olahraga.
-- Menampilkan review dan rating dari pengguna lain.
-- Admin dapat mengelola review yang tidak sesuai.
-
-Integrasi: Terkoneksi dengan Place dan Auth & Profile.
-
-
-6. Trainer Booking (Modul Pemesanan Trainer)
-
-Fungsi:
-Memungkinkan pengguna untuk melihat daftar trainer, melakukan booking sesi olahraga, dan mengelola jadwal sesi. Admin dapat memonitor dan mengatur booking serta jadwal trainer.
-
-Fitur utama per role dalam modul Trainer Booking
-A. User (Pengguna Biasa)
-- Melihat daftar trainer beserta spesialisasi, rating, dan jadwal tersedia.
-- Memilih tanggal, jam, durasi, dan jenis latihan untuk sesi training.
-- Membuat, mengubah, atau membatalkan booking sesi mereka sendiri.
-- Menyimpan riwayat booking (status: pending, selesai, dibatalkan).
-- Memberikan review dan rating untuk trainer setelah sesi selesai.
-
-B. Admin
-- Melihat seluruh booking yang dibuat oleh user.
-- Mengatur jadwal trainer (menambah slot baru, mengubah atau menonaktifkan slot).
-- Membatalkan booking jika ada konflik atau masalah.
-- Memantau dan mengelola review yang diberikan user.
-
-Integrasi
-Auth & Profile: untuk identifikasi pengguna dan akses sesuai role.
-Review: untuk menampilkan dan mengelola rating/trainer feedback.
-Place / Search: jika sesi dilakukan di lokasi tertentu (misal gym atau lapangan tertentu).
-
-
-
-Link Figma: 
-https://www.figma.com/design/vXSH1mwzy0O4ozmXNNKxCT/FitMatrix?node-id=0-1&t=0LneyTAaBzi1ylCE-1
-password: olahega
-
-Link deployment PWS:
-https://fadhil-daffa-fitmatrix.pbp.cs.ui.ac.id/
-
-Initial dataset: 
-https://huggingface.co/datasets/Shiowo2/Initial-Data-FitMatrix
-https://commons.wikimedia.org/w/index.php?search=lapangan+indonesia&title=Special%3AMediaSearch&type=image WikiMedia, keyword: lapangan Indonesia
-https://commons.wikimedia.org/w/index.php?search=headshot&title=Special%3AMediaSearch&type=image WikiMedia, keyword: headshot (profile trainer)
-
-
-
-
-
-
-
-
-
+```bash
+python manage.py test
+```
