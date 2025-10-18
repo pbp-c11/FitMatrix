@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}FitMatrix · Welcome{% endblock %}
+{% block content %}
+<section class="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 md:py-24 animate-in">
+  <div class="glass card text-center space-y-6">
+    <h1 class="text-3xl md:text-5xl font-bold drop-shadow">Empower your fitness journey</h1>
+    <p class="text-white/80 max-w-2xl mx-auto">Discover curated places, connect with expert trainers, and stay on top of your schedule with a single holistic dashboard.</p>
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}" class="btn-primary">Go to dashboard</a>
+      {% else %}
+        <a href="{% url 'accounts:register' %}" class="btn-primary">Create account</a>
+        <a href="{% url 'accounts:login' %}" class="btn glass border border-white/20">Sign in</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

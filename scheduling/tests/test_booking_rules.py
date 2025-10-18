@@ -1,0 +1,65 @@
+from __future__ import annotations
+
+from datetime import timedelta
+
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+from django.utils import timezone
+
+from accounts.models import ActivityLog
+from places.models import Place
+from scheduling.models import Booking, SessionSlot, Trainer
+
+User = get_user_model()
+
+
+class BookingRulesTests(TestCase):
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="user1",
+            email="user1@example.com",
+            password="Testpass123!",
+        )
+        self.user2 = User.objects.create_user(
+            username="user2",
+            email="user2@example.com",
+            password="Testpass123!",
+        )
+        self.trainer = Trainer.objects.create(name="Coach", specialties="Strength", bio="")
+        self.place = Place.objects.create(
+            name="Gym",
+            address="Jl. Asia Afrika",
+            city="Jakarta",
+            is_free=True,
+        )
+        start = timezone.now() + timedelta(days=1)
+        end = start + timedelta(hours=1)
+        self.slot = SessionSlot.objects.create(
+            trainer=self.trainer,
+            place=self.place,
+            start=start,
+            end=end,
+            capacity=1,
+        )
+
+    def test_unique_booking_per_user_slot(self) -> None:
+        Booking.objects.create(user=self.user, slot=self.slot)
+        with self.assertRaises(ValidationError):
+            Booking(user=self.user, slot=self.slot).save()
+
+    def test_capacity_enforced(self) -> None:
+        Booking.objects.create(user=self.user, slot=self.slot)
+        with self.assertRaises(ValidationError):
+            Booking.objects.create(user=self.user2, slot=self.slot)
+
+    def test_cancel_restores_capacity_and_logs(self) -> None:
+        booking = Booking.objects.create(user=self.user, slot=self.slot)
+        self.assertEqual(self.slot.seats_left(), 0)
+        booking.cancel()
+        self.assertEqual(self.slot.seats_left(), 1)
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                user=self.user, type=ActivityLog.Types.BOOKING_CANCELLED
+            ).exists()
+        )
