@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ place.name }} | FitMatrix{% endblock %}
+{% block content %}
+<article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 pb-24 space-y-16">
+  <header class="space-y-6">
+    <div class="matrix-detail-gallery">
+      <div class="matrix-detail-gallery__hero relative overflow-hidden">
+        {% with image=place.hero_image|default:'media/hero-athlete.jpg' %}
+          {% if image and '://' in image %}
+            <img src="{{ image }}" alt="{{ place.name }}" class="w-full h-full object-cover" />
+          {% else %}
+            <img src="{% static image %}" alt="{{ place.name }}" class="w-full h-full object-cover" />
+          {% endif %}
+        {% endwith %}
+        <div class="matrix-hero-grid"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#031016] via-transparent to-transparent"></div>
+        <div class="absolute bottom-6 left-6 matrix-chip">{{ place.facility_type }}</div>
+      </div>
+      <div class="matrix-detail-gallery__stack grid gap-3">
+        {% with gallery=place.gallery_list %}
+          {% if gallery %}
+            {% for image in gallery|slice:":3" %}
+              <img
+                src="{% if image and '://' in image %}{{ image }}{% else %}{% static image %}{% endif %}"
+                alt="Gallery image {{ forloop.counter }}"
+                class="w-full h-40 object-cover rounded-2xl"
+              />
+            {% endfor %}
+          {% else %}
+            <img src="{% static 'media/outdoor-matrix.jpg' %}" alt="Outdoor rig" class="w-full h-40 object-cover rounded-2xl" />
+            <img src="{% static 'media/aqua-circuit.jpg' %}" alt="Aquatic training" class="w-full h-40 object-cover rounded-2xl" />
+            <img src="{% static 'media/studio-flow.jpg' %}" alt="Studio flow" class="w-full h-40 object-cover rounded-2xl" />
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+    <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div class="space-y-4 max-w-3xl">
+        <p class="matrix-label">{{ place.facility_type }} facility</p>
+        <h1 class="text-4xl sm:text-[3rem] font-semibold leading-tight">{{ place.name }}</h1>
+        <p class="text-forest-muted text-base sm:text-lg">{{ place.summary|default:place.tagline }}</p>
+        <div class="matrix-pill-group">
+          {% with city_val=place.city|default:'' %}
+            {% if city_val and city_val|lower != 'unknown' and city_val != '-' and city_val|lower != 'n/a' and city_val|lower != 'na' %}
+              <span class="matrix-pill">{{ city_val }}</span>
+            {% endif %}
+          {% endwith %}
+          {% if place.address %}
+            <span class="matrix-pill">{{ place.address }}</span>
+          {% endif %}
+          <span class="matrix-pill">{{ place.price_display }}</span>
+          <span class="matrix-pill">Avg rating {{ place.rating_avg|floatformat:1 }}</span>
+        </div>
+      </div>
+      <div class="space-y-4 matrix-glass matrix-glow px-6 py-5 rounded-3xl min-w-[260px]">
+        <div class="flex flex-col gap-2">
+          <span class="matrix-meta-label">Price</span>
+          <span class="matrix-price-tag text-2xl">{{ place.price_display }}</span>
+        </div>
+        <div class="flex flex-col gap-2">
+          <span class="matrix-meta-label">Likes</span>
+          <span class="matrix-meta-value">{{ place.likes }}</span>
+        </div>
+        <div class="flex flex-col gap-2">
+          <span class="matrix-meta-label">Highlight score</span>
+          <span class="matrix-meta-value">{{ place.highlight_score }}</span>
+        </div>
+        <form method="post" action="{% url 'accounts:wishlist-toggle' 'place' place.pk %}" class="w-full">
+          {% csrf_token %}
+          <button type="submit" class="matrix-btn w-full" data-variant="ghost">Add to wishlist</button>
+        </form>
+        {% if place.latitude and place.longitude %}
+          <a href="{{ place.google_maps_url }}" target="_blank" rel="noopener" class="matrix-btn w-full">Detailed Location</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <section class="space-y-6">
+    <h2 class="matrix-section-title">Amenities matrix</h2>
+    <div class="matrix-pill-group">
+      {% for amenity in place.amenities_list %}
+        <span class="matrix-pill">{{ amenity|capfirst }}</span>
+      {% empty %}
+        <span class="matrix-pill">High-spec equipment</span>
+        <span class="matrix-pill">Recovery lounge</span>
+        <span class="matrix-pill">Locker suite</span>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if place.opening_hours %}
+    <section class="space-y-3">
+      <h2 class="matrix-section-title">Opening hours</h2>
+      <p class="text-forest-muted">{{ place.opening_hours }}</p>
+    </section>
+  {% endif %}
+
+  {% if place.latitude and place.longitude %}
+    <section class="space-y-4">
+      <h2 class="matrix-section-title">Location</h2>
+      <div class="w-full rounded-2xl overflow-hidden matrix-glass">
+        <iframe
+          title="Map location"
+          width="100%"
+          height="360"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          src="{{ place.map_embed_url }}">
+        </iframe>
+      </div>
+    </section>
+  {% endif %}
+
+  {% if nearby %}
+    <section class="space-y-6">
+      <h2 class="matrix-section-title">Nearby synergies</h2>
+      <div class="matrix-grid">
+        {% include "places/_cards.html" with places=nearby %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+      <h2 class="matrix-section-title">More recommendations</h2>
+      <a href="{% url 'places:list' %}" class="matrix-btn" data-variant="ghost">Back to search</a>
+    </div>
+    <div class="matrix-grid">
+      {% include "places/_cards.html" with places=recommended %}
+    </div>
+  </section>
+</article>
+{% endblock %}
