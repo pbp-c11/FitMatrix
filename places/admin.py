@@ -5,6 +5,65 @@ from .models import Place
 
 @admin.register(Place)
 class PlaceAdmin(admin.ModelAdmin):
-    list_display = ("name", "city", "is_free", "price", "is_active")
-    list_filter = ("city", "is_free", "is_active")
-    search_fields = ("name", "city")
+    list_display = (
+        "name",
+        "city",
+        "facility_type",
+        "is_free",
+        "price",
+        "highlight_score",
+        "is_active",
+    )
+    list_filter = ("facility_type", "city", "is_free", "is_active")
+    search_fields = ("name", "city", "summary", "tags")
+    readonly_fields = ("created_at",)
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "name",
+                    "slug",
+                    "tagline",
+                    "summary",
+                    "facility_type",
+                    "tags",
+                )
+            },
+        ),
+        (
+            "Location & Pricing",
+            {
+                "fields": (
+                    "address",
+                    "city",
+                    "is_free",
+                    "price",
+                )
+            },
+        ),
+        (
+            "Experience",
+            {
+                "fields": (
+                    "amenities",
+                    "gallery",
+                    "hero_image",
+                    "accent_color",
+                    "highlight_score",
+                )
+            },
+        ),
+        (
+            "Meta",
+            {
+                "fields": (
+                    "rating_avg",
+                    "likes",
+                    "is_active",
+                    "created_at",
+                )
+            },
+        ),
+    )
+    prepopulated_fields = {"slug": ("name",)}

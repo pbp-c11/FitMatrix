@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import json
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
@@ -9,7 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from accounts.models import ActivityLog, WishlistItem
+from accounts.models import ActivityLog, WishlistCollection, WishlistItem
 from places.models import Place
 
 User = get_user_model()
@@ -83,16 +84,42 @@ class AccountsTests(TestCase):
         )
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.post(
-            reverse("accounts:wishlist-toggle", args=("place", place.id)),
+            reverse("wishlist:toggle", args=("place", place.id)),
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertJSONEqual(response.content, {"status": "added"})
         self.assertTrue(WishlistItem.objects.filter(user=self.user, place=place).exists())
         response = self.client.post(
-            reverse("accounts:wishlist-toggle", args=("place", place.id)),
+            reverse("wishlist:toggle", args=("place", place.id)),
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertJSONEqual(response.content, {"status": "removed"})
+
+    def test_create_collection_and_add_place(self) -> None:
+        place = Place.objects.create(
+            name="Ride Lab",
+            address="Jl. Senopati",
+            city="Jakarta",
+            is_free=True,
+        )
+        self.client.login(username=self.user.username, password=self.password)
+        payload = {
+            "name": "Morning Crew",
+            "description": "Cycling spots",
+            "place_id": place.id,
+        }
+        response = self.client.post(
+            reverse("accounts:create-collection"),
+            data=json.dumps(payload),
+            content_type="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], "added")
+        collection = WishlistCollection.objects.get(user=self.user, name="Morning Crew")
+        self.assertEqual(collection.items.count(), 1)
+        self.assertTrue(WishlistItem.objects.filter(user=self.user, place=place).exists())
 
     def test_admin_permission_required(self) -> None:
         self.client.login(username=self.user.username, password=self.password)

@@ -57,3 +57,33 @@ class ReviewVisibilityTests(TestCase):
         review.save(update_fields=["is_visible", "rating"])
         self.trainer.refresh_from_db()
         self.assertEqual(self.trainer.rating_avg, 3)
+
+    def test_delete_review_updates_trainer_average(self) -> None:
+        other_user = User.objects.create_user(
+            username="reviewer2",
+            email="reviewer2@example.com",
+            password="StrongPass123!",
+        )
+        other_booking = Booking.objects.create(user=other_user, slot=self.slot)
+        first = Review.objects.create(
+            booking=self.booking,
+            user=self.user,
+            trainer=self.trainer,
+            rating=5,
+            comment="Great",
+        )
+        second = Review.objects.create(
+            booking=other_booking,
+            user=other_user,
+            trainer=self.trainer,
+            rating=1,
+            comment="Needs work",
+        )
+        self.trainer.refresh_from_db()
+        self.assertEqual(self.trainer.rating_avg, 3)
+        second.delete()
+        self.trainer.refresh_from_db()
+        self.assertEqual(self.trainer.rating_avg, 5)
+        first.delete()
+        self.trainer.refresh_from_db()
+        self.assertEqual(self.trainer.rating_avg, 0)

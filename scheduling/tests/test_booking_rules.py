@@ -63,3 +63,42 @@ class BookingRulesTests(TestCase):
                 user=self.user, type=ActivityLog.Types.BOOKING_CANCELLED
             ).exists()
         )
+
+    def test_cancel_by_admin_sets_flag_once(self) -> None:
+        booking = Booking.objects.create(user=self.user, slot=self.slot)
+        booking.cancel(by_admin=True)
+        logs = ActivityLog.objects.filter(
+            user=self.user,
+            type=ActivityLog.Types.BOOKING_CANCELLED,
+            meta__by_admin=True,
+        )
+        self.assertEqual(logs.count(), 1)
+        # cancelling again should be a no-op
+        booking.cancel(by_admin=True)
+        self.assertEqual(logs.count(), 1)
+
+    def test_session_slot_validation_rules(self) -> None:
+        with self.assertRaises(ValidationError):
+            SessionSlot(
+                trainer=self.trainer,
+                place=self.place,
+                start=self.slot.start,
+                end=self.slot.start,
+                capacity=1,
+            ).full_clean()
+        with self.assertRaises(ValidationError):
+            SessionSlot(
+                trainer=self.trainer,
+                place=self.place,
+                start=self.slot.start,
+                end=self.slot.end,
+                capacity=0,
+            ).full_clean()
+
+    def test_booking_creation_logs_activity(self) -> None:
+        booking = Booking.objects.create(user=self.user, slot=self.slot)
+        log = ActivityLog.objects.get(
+            user=self.user,
+            type=ActivityLog.Types.BOOKING_CREATED,
+        )
+        self.assertEqual(log.meta["booking_id"], booking.pk)
