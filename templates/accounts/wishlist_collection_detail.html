@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}{{ collection.name }} | FitMatrix{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-8 py-12 space-y-10">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <a href="{% url 'accounts:wishlist' %}" class="text-green-600 hover:text-green-700 text-sm font-medium">&larr; Back to Wishlist</a>
+      <h1 class="text-3xl font-bold mt-3">{{ collection.name }}</h1>
+      <p class="text-gray-500">{{ collection.description|default:"No description" }}</p>
+    </div>
+    <p class="text-gray-400 text-sm">{{ collection.items.count }} place{{ collection.items.count|pluralize }}</p>
+  </div>
+
+  <!-- Grid of places -->
+  {% if collection.items.all %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+      {% for item in collection.items.all %}
+      <div id="item-{{ item.id }}" class="collection-card bg-white rounded-2xl shadow hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-6 h-56 flex flex-col justify-between border border-gray-100">
+        
+        <!-- Info -->
+        <div>
+          <h2 class="text-lg font-semibold text-gray-800 truncate">{{ item.place.name }}</h2>
+          <p class="text-gray-500 text-sm">{{ item.place.city }}</p>
+        </div>
+
+        <!-- Aksi -->
+        <div class="flex justify-between items-center mt-4">
+          <a href="{% url 'places:detail' item.place.slug %}" 
+             class="text-green-600 hover:text-green-700 font-medium text-sm">
+            View →
+          </a>
+          <button 
+            class="text-red-500 hover:text-red-600 text-sm"
+            data-id="{{ item.id }}"
+            data-name="{{ item.place.name|escapejs }}"
+            onclick="removeItem(this)">
+            Remove
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-gray-500 text-center py-10 bg-white rounded-2xl border border-gray-100 shadow">
+      This collection has no saved places yet.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 0.3s ease-out;
+}
+</style>
+
+<!-- Container untuk toast -->
+<div id="toastContainer" class="fixed bottom-6 right-6 space-y-2 z-50"></div>
+
+<script>
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `px-4 py-3 rounded-xl shadow-lg text-white animate-fadeInUp ${
+    type === 'error' ? 'bg-red-500' : 'bg-green-500'
+  }`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-2');
+    setTimeout(() => toast.remove(), 400);
+  }, 2500);
+}
+
+// ===== Custom confirmation modal =====
+function openConfirmModal(message, onConfirm) {
+  const modal = document.createElement('div');
+  modal.className = "fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50";
+  modal.innerHTML = `
+    <div class="bg-white rounded-2xl p-6 w-[360px] text-center space-y-4">
+      <p class="text-gray-800">${message}</p>
+      <div class="flex justify-center gap-4 mt-4">
+        <button id="cancelBtn" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+        <button id="confirmBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Remove</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#cancelBtn').addEventListener('click', () => modal.remove());
+  modal.querySelector('#confirmBtn').addEventListener('click', () => {
+    modal.remove();
+    onConfirm();
+  });
+}
+
+function removeItem(btn) {
+  const id = btn.dataset.id;
+  const name = btn.dataset.name;
+
+  openConfirmModal(`Remove "${name}" from this collection?`, () => {
+    fetch(`/accounts/collections/item/${id}/delete/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "deleted") {
+        const card = document.getElementById(`item-${id}`);
+        card.style.transition = "opacity 0.3s, transform 0.3s";
+        card.style.opacity = 0;
+        card.style.transform = "scale(0.95)";
+        setTimeout(() => card.remove(), 300);
+        showToast(`Removed "${name}" from collection`, "success");
+      } else {
+        showToast("Failed to delete item.", "error");
+      }
+    })
+    .catch(() => showToast("Network error.", "error"));
+  });
+}
+
+</script>
+{% endblock %}
