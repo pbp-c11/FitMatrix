@@ -1,5 +1,6 @@
 from django.urls import path
 
+<<<<<<< HEAD
 from .views import (
     booking_cancel,
     booking_create,
@@ -9,15 +10,21 @@ from .views import (
     trainer_list,
     upcoming_sessions,
 )
+=======
+from .views import upcoming_sessions
+>>>>>>> origin/kanayradeeva010
 
 app_name = "scheduling"
 
 urlpatterns = [
     path("", upcoming_sessions, name="sessions"),
+<<<<<<< HEAD
     path("trainers/", trainer_list, name="trainers"),
     path("trainers/<int:pk>/", trainer_detail, name="trainer-detail"),
     path("slots/<int:pk>/book/", booking_create, name="booking-create"),
     path("bookings/", booking_manage, name="booking-manage"),
     path("bookings/<int:pk>/cancel/", booking_cancel, name="booking-cancel"),
     path("bookings/<int:pk>/reschedule/", booking_reschedule, name="booking-reschedule"),
+=======
+>>>>>>> origin/kanayradeeva010
 ]

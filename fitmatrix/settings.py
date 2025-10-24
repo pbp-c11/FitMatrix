@@ -37,10 +37,15 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "accounts",
+<<<<<<< HEAD
     "search",
     "places",
     "scheduling",
     "wishlist",
+=======
+    "places",
+    "scheduling",
+>>>>>>> origin/kanayradeeva010
     "reviews",
 ]
 
@@ -120,8 +125,13 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+<<<<<<< HEAD
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+=======
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+>>>>>>> origin/kanayradeeva010
 
 CACHES = {
     "default": {

@@ -4,6 +4,7 @@
 
 {% block content %}
 <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 pb-24 space-y-16">
+<<<<<<< HEAD
 
   <!-- HERO & GALLERY -->
   <section class="grid md:grid-cols-4 gap-4 mt-6">
@@ -241,4 +242,274 @@
 </script>
 
 
+=======
+  <header class="space-y-6">
+    <div class="matrix-detail-gallery">
+      <div class="matrix-detail-gallery__hero relative overflow-hidden">
+        {% with image=place.hero_image|default:'media/hero-athlete.jpg' %}
+          {% if image and '://' in image %}
+            <img src="{{ image }}" alt="{{ place.name }}" class="w-full h-full object-cover" />
+          {% else %}
+            <img src="{% static image %}" alt="{{ place.name }}" class="w-full h-full object-cover" />
+          {% endif %}
+        {% endwith %}
+        <div class="matrix-hero-grid"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#031016] via-transparent to-transparent"></div>
+        <div class="absolute bottom-6 left-6 matrix-chip">{{ place.facility_type }}</div>
+      </div>
+
+      <div class="matrix-detail-gallery__stack grid gap-3">
+        {% with gallery=place.gallery_list %}
+          {% if gallery %}
+            {% for image in gallery|slice:":3" %}
+              <img
+                src="{% if image and '://' in image %}{{ image }}{% else %}{% static image %}{% endif %}"
+                alt="Gallery image {{ forloop.counter }}"
+                class="w-full h-40 object-cover rounded-2xl"
+              />
+            {% endfor %}
+          {% else %}
+            <img src="{% static 'media/outdoor-matrix.jpg' %}" alt="Outdoor rig" class="w-full h-40 object-cover rounded-2xl" />
+            <img src="{% static 'media/aqua-circuit.jpg' %}" alt="Aquatic training" class="w-full h-40 object-cover rounded-2xl" />
+            <img src="{% static 'media/studio-flow.jpg' %}" alt="Studio flow" class="w-full h-40 object-cover rounded-2xl" />
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div class="space-y-4 max-w-3xl">
+        <p class="matrix-label">{{ place.facility_type }} facility</p>
+        <h1 class="text-4xl sm:text-[3rem] font-semibold leading-tight">{{ place.name }}</h1>
+        <p class="text-forest-muted text-base sm:text-lg">{{ place.summary|default:place.tagline }}</p>
+        <div class="matrix-pill-group">
+          <span class="matrix-pill">{{ place.city }}</span>
+          <span class="matrix-pill">{{ place.address }}</span>
+          <span class="matrix-pill">{{ place.price_display }}</span>
+          <span class="matrix-pill">Avg rating {{ place.rating_avg|floatformat:1 }}</span>
+        </div>
+      </div>
+
+      <div class="space-y-4 matrix-glass matrix-glow px-6 py-5 rounded-3xl min-w-[260px]">
+        <div class="flex flex-col gap-2">
+          <span class="matrix-meta-label">Price</span>
+          <span class="matrix-price-tag text-2xl">{{ place.price_display }}</span>
+        </div>
+        <div class="flex flex-col gap-2">
+          <span class="matrix-meta-label">Likes</span>
+          <span class="matrix-meta-value">{{ place.likes }}</span>
+        </div>
+        <div class="flex flex-col gap-2">
+          <span class="matrix-meta-label">Highlight score</span>
+          <span class="matrix-meta-value">{{ place.highlight_score }}</span>
+        </div>
+
+        {% if user.is_authenticated %}
+        <button id="openCollectionModal" class="matrix-btn w-full" data-variant="ghost">
+          ♡ Add to Wishlist Collection
+        </button>
+
+        <!-- MODAL Add to Collection -->
+        <div id="collectionModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div class="bg-white rounded-2xl p-6 w-[400px] text-black space-y-4">
+            <h3 class="text-xl font-semibold">Add to Collection</h3>
+
+            <form id="collectionForm">
+              {% csrf_token %}
+
+              <!-- Dropdown koleksi -->
+              <div class="space-y-2">
+                <label class="text-sm font-medium">Save to</label>
+                <select id="collectionSelect" class="w-full p-2 rounded-lg border border-gray-300">
+                  <option value="__new__">+ Create new collection</option>
+                </select>
+              </div>
+
+              <!-- Input baru (muncul hanya kalau bikin baru) -->
+              <div id="newFields" class="space-y-3 mt-2">
+                <div>
+                  <label for="collection_name" class="text-sm font-medium">Collection Name</label>
+                  <input type="text" id="collection_name" class="w-full p-2 rounded-lg border border-gray-300">
+                </div>
+                <div>
+                  <label for="collection_desc" class="text-sm font-medium">Description (optional)</label>
+                  <textarea id="collection_desc" class="w-full p-2 rounded-lg border border-gray-300"></textarea>
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-3 mt-4">
+                <button type="button" id="cancelModal" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="matrix-btn w-full" data-variant="ghost">
+            Login to Save
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <section class="space-y-6">
+    <h2 class="matrix-section-title">Amenities matrix</h2>
+    <div class="matrix-pill-group">
+      {% for amenity in place.amenities_list %}
+        <span class="matrix-pill">{{ amenity }}</span>
+      {% empty %}
+        <span class="matrix-pill">High-spec equipment</span>
+        <span class="matrix-pill">Recovery lounge</span>
+        <span class="matrix-pill">Locker suite</span>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if nearby %}
+    <section class="space-y-6">
+      <h2 class="matrix-section-title">Nearby synergies</h2>
+      <div class="matrix-grid">
+        {% include "places/_cards.html" with places=nearby %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+      <h2 class="matrix-section-title">More recommendations</h2>
+      <a href="{% url 'places:list' %}" class="matrix-btn" data-variant="ghost">Back to search</a>
+    </div>
+    <div class="matrix-grid">
+      {% include "places/_cards.html" with places=recommended %}
+    </div>
+  </section>
+</article>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 0.3s ease-out;
+  transition: opacity 0.3s, transform 0.3s;
+}
+</style>
+
+<!-- Tempat munculnya toast -->
+<div id="toastContainer" class="fixed bottom-6 right-6 space-y-2 z-50"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const openBtn = document.getElementById('openCollectionModal');
+  const modal = document.getElementById('collectionModal');
+  const cancelBtn = document.getElementById('cancelModal');
+  const form = document.getElementById('collectionForm');
+  const selectEl = document.getElementById('collectionSelect');
+  const newFields = document.getElementById('newFields');
+  const toastContainer = document.getElementById('toastContainer');
+
+  const CSRF = '{{ csrf_token }}';
+  const PLACE_ID = '{{ place.id }}';
+
+  // Fungsi buat munculin notifikasi toast
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `px-4 py-3 rounded-xl shadow-lg text-white animate-fadeInUp ${
+      type === 'error' ? 'bg-red-500' : 'bg-green-500'
+    }`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-y-2');
+      setTimeout(() => toast.remove(), 500);
+    }, 3000);
+  }
+
+  // buka modal & load koleksi
+  openBtn?.addEventListener('click', async () => {
+    modal.classList.remove('hidden');
+    await loadCollections();
+  });
+
+  // tutup modal
+  cancelBtn?.addEventListener('click', () => modal.classList.add('hidden'));
+
+  // toggle input baru
+  selectEl?.addEventListener('change', () => {
+    newFields.style.display = (selectEl.value === '__new__') ? 'block' : 'none';
+  });
+
+  // ambil daftar koleksi user
+  async function loadCollections() {
+    try {
+      const res = await fetch("{% url 'accounts:get-user-collections' %}");
+      const data = await res.json();
+      selectEl.innerHTML = '<option value="__new__">+ Create new collection</option>';
+      data.collections.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        selectEl.appendChild(opt);
+      });
+    } catch (err) {
+      console.error('Error fetching collections:', err);
+    }
+  }
+
+  // submit form
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const isNew = (selectEl.value === '__new__');
+    const url = isNew
+      ? "{% url 'accounts:create-collection' %}"
+      : "{% url 'accounts:add-to-collection' %}";
+
+    const payload = isNew
+      ? {
+          name: document.getElementById('collection_name').value,
+          description: document.getElementById('collection_desc').value,
+          place_id: PLACE_ID
+        }
+      : { collection_id: selectEl.value, place_id: PLACE_ID };
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': CSRF,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (data.status === 'exists') {
+        showToast('Already in that collection!', 'error');
+      } else if (data.status === 'added') {
+        const collectionName = data.collection || payload.name || 'collection';
+        showToast(`{{ place.name }} added to "${collectionName}"!`, 'success');
+        modal.classList.add('hidden');
+      } else {
+        showToast('Failed to save.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Network error.', 'error');
+    }
+  });
+});
+</script>
+>>>>>>> origin/kanayradeeva010
 {% endblock %}

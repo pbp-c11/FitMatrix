@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+<<<<<<< HEAD
 import json
+=======
+>>>>>>> origin/kanayradeeva010
 import time
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -13,6 +16,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
+<<<<<<< HEAD
 from django.views.decorators.csrf import csrf_exempt
 
 from reviews.models import Review
@@ -34,12 +38,29 @@ from .forms import (
     RegisterForm,
 )
 from .models import ActivityLog, CollectionItem, User, WishlistCollection, WishlistItem
+=======
+from django.contrib.auth.decorators import login_required
+from .models import CollectionItem
+from .models import WishlistCollection
+from places.models import Place
+from reviews.models import Review
+from scheduling.forms import SessionSlotForm
+from django.views.decorators.http import require_GET
+from scheduling.models import Booking, SessionSlot, Trainer
+
+from .forms import AccessiblePasswordChangeForm, LoginForm, ProfileForm, RegisterForm
+from .models import ActivityLog, User, WishlistItem
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+>>>>>>> origin/kanayradeeva010
 
 THROTTLE_LIMIT = 5
 THROTTLE_TIMEOUT = 600  # seconds
 THROTTLE_DELAY = 2
 
 
+<<<<<<< HEAD
 def is_admin(user: User) -> bool:
     return user.is_authenticated and user.is_admin
 
@@ -79,12 +100,114 @@ def delete_collection_item_view(request, pk):
 def wishlist_collection_detail(request, pk):
     collection = get_object_or_404(WishlistCollection, pk=pk, user=request.user)
     items = collection.items.select_related("place")
+=======
+@login_required
+def wishlist_collection_detail_view(request, pk):
+    collection = get_object_or_404(WishlistCollection, pk=pk, user=request.user)
+    items = CollectionItem.objects.filter(collection=collection).select_related("place")
+
+>>>>>>> origin/kanayradeeva010
     return render(request, "accounts/wishlist_collection_detail.html", {
         "collection": collection,
         "items": items,
     })
 
 
+<<<<<<< HEAD
+=======
+@login_required
+@require_GET
+def get_user_collections(request: HttpRequest) -> JsonResponse:
+    collections = WishlistCollection.objects.filter(user=request.user).values("id", "name")
+    return JsonResponse({"collections": list(collections)})
+
+
+@login_required
+@require_POST
+def delete_collection_view(request: HttpRequest, pk: int) -> JsonResponse:
+    if request.headers.get("x-requested-with") != "XMLHttpRequest":
+        return JsonResponse({"status": "invalid_request"}, status=400)
+
+    collection = get_object_or_404(WishlistCollection, pk=pk, user=request.user)
+    collection.delete()
+    return JsonResponse({"status": "deleted"})
+
+
+
+@login_required
+@csrf_exempt
+@require_POST
+def create_collection_view(request: HttpRequest) -> JsonResponse:
+    data = json.loads(request.body)
+    name = data.get("name")
+    desc = data.get("description", "")
+    place_id = data.get("place_id")
+
+    if not name or not place_id:
+        return JsonResponse({"error": "Missing name or place_id"}, status=400)
+
+    collection, created = WishlistCollection.objects.get_or_create(
+        user=request.user,
+        name=name,
+        defaults={"description": desc},
+    )
+
+    # Cek kalau item-nya udah ada
+    from places.models import Place
+    place = Place.objects.get(pk=place_id)
+    if CollectionItem.objects.filter(collection=collection, place=place).exists():
+        return JsonResponse({"status": "exists"})
+
+    CollectionItem.objects.create(collection=collection, place=place)
+    return JsonResponse({"status": "added"})
+
+@login_required
+@require_POST
+def add_to_collection_view(request: HttpRequest) -> JsonResponse:
+    import json
+    data = json.loads(request.body)
+    collection_id = data.get("collection_id")
+    place_id = data.get("place_id")
+
+    if not collection_id or not place_id:
+        return JsonResponse({"error": "Missing collection_id or place_id"}, status=400)
+
+    collection = get_object_or_404(WishlistCollection, id=collection_id, user=request.user)
+    place = get_object_or_404(Place, pk=place_id)
+
+    if CollectionItem.objects.filter(collection=collection, place=place).exists():
+        return JsonResponse({"status": "exists"})
+
+    CollectionItem.objects.create(collection=collection, place=place)
+    return JsonResponse({"status": "added", "collection": collection.name})
+
+@login_required
+@require_POST
+def delete_collection_item_view(request, pk):
+    from .models import CollectionItem
+    item = get_object_or_404(CollectionItem, pk=pk, collection__user=request.user)
+    item.delete()
+    return JsonResponse({"status": "deleted"})
+
+
+@login_required
+def wishlist_collections_view(request: HttpRequest) -> HttpResponse:
+    # Ambil semua koleksi wishlist milik user yang sedang login
+    collections = WishlistCollection.objects.filter(user=request.user).order_by("-created_at")
+    
+    # Kirim datanya ke template baru, misalnya "accounts/wishlist_collections.html"
+    return render(
+        request,
+        "accounts/wishlist_collections.html",
+        {"collections": collections}
+    )
+
+
+def is_admin(user: User) -> bool:
+    return user.is_authenticated and user.is_admin
+
+
+>>>>>>> origin/kanayradeeva010
 def register_view(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect("accounts:profile")
@@ -138,6 +261,7 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     return redirect("accounts:login")
 
 
+<<<<<<< HEAD
 def _require_ajax(request: HttpRequest) -> JsonResponse | None:
     if request.headers.get("x-requested-with") != "XMLHttpRequest":
         return JsonResponse({"error": "Invalid request."}, status=400)
@@ -248,6 +372,8 @@ def delete_collection_item_view(request: HttpRequest, pk: int) -> JsonResponse:
     return JsonResponse({"status": "deleted"})
 
 
+=======
+>>>>>>> origin/kanayradeeva010
 @login_required
 def profile_view(request: HttpRequest) -> HttpResponse:
     now = timezone.now()
@@ -322,12 +448,71 @@ def activity_history_view(request: HttpRequest) -> HttpResponse:
     return render(request, "accounts/activity_history.html", {"page_obj": page_obj})
 
 
+<<<<<<< HEAD
+=======
+@login_required
+@require_GET
+def wishlist_view(request: HttpRequest) -> HttpResponse:
+    collections = (
+        WishlistCollection.objects.filter(user=request.user)
+        .prefetch_related("items__place")
+        .order_by("-created_at")
+    )
+
+    return render(
+        request,
+        "accounts/wishlist.html",
+        {"collections": collections}
+    )
+
+
+@login_required
+@require_POST
+def wishlist_toggle_view(request: HttpRequest, kind: str, pk: int) -> HttpResponse:
+    if kind not in {"place", "trainer"}:
+        return JsonResponse({"error": "Invalid kind"}, status=400)
+    model = Place if kind == "place" else Trainer
+    target = get_object_or_404(model, pk=pk)
+    filters: dict[str, object] = {"user": request.user}
+    if kind == "place":
+        filters["place"] = target
+    else:
+        filters["trainer"] = target
+    item = WishlistItem.objects.filter(**filters).first()
+    if item:
+        item.delete()
+        ActivityLog.objects.create(
+            user=request.user,
+            type=ActivityLog.Types.WISHLIST_REMOVED,
+            meta={"kind": kind, "id": pk},
+        )
+        state = "removed"
+    else:
+        item = WishlistItem(user=request.user)
+        if kind == "place":
+            item.place = target
+        else:
+            item.trainer = target
+        item.save()
+        ActivityLog.objects.create(
+            user=request.user,
+            type=ActivityLog.Types.WISHLIST_ADDED,
+            meta={"kind": kind, "id": pk},
+        )
+        state = "added"
+    return JsonResponse({"status": state})
+
+
+>>>>>>> origin/kanayradeeva010
 @user_passes_test(is_admin)
 def admin_console_view(request: HttpRequest) -> HttpResponse:
     total_users = User.objects.count()
     total_bookings = Booking.objects.count()
+<<<<<<< HEAD
     total_places = Place.objects.count()
     total_trainers = Trainer.objects.count()
+=======
+>>>>>>> origin/kanayradeeva010
     upcoming_slots = SessionSlot.objects.filter(start__gte=timezone.now()).count()
     return render(
         request,
@@ -335,14 +520,18 @@ def admin_console_view(request: HttpRequest) -> HttpResponse:
         {
             "total_users": total_users,
             "total_bookings": total_bookings,
+<<<<<<< HEAD
             "total_places": total_places,
             "total_trainers": total_trainers,
+=======
+>>>>>>> origin/kanayradeeva010
             "upcoming_slots": upcoming_slots,
         },
     )
 
 
 @user_passes_test(is_admin)
+<<<<<<< HEAD
 def admin_users_list(request: HttpRequest) -> HttpResponse:
     admins = User.objects.filter(role=User.Roles.ADMIN).order_by("username")
     form = AdminUserCreationForm(request.POST or None)
@@ -462,6 +651,8 @@ def admin_trainer_toggle(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @user_passes_test(is_admin)
+=======
+>>>>>>> origin/kanayradeeva010
 def admin_slots_list(request: HttpRequest) -> HttpResponse:
     slots = SessionSlot.objects.select_related("trainer", "place").order_by("start")
     return render(request, "accounts/admin/slots_list.html", {"slots": slots})

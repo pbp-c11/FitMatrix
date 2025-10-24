@@ -10,6 +10,7 @@ urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("", home_view, name="home"),
     path("accounts/", include("accounts.urls")),
+<<<<<<< HEAD
     path("search/", include("search.urls")),
     path("places/", include("places.urls")),
     path("scheduling/", include("scheduling.urls")),
@@ -25,6 +26,12 @@ urlpatterns = [
     path("admin/trainers/new/", account_views.admin_trainer_create, name="admin-trainer-create"),
     path("admin/trainers/<int:pk>/edit/", account_views.admin_trainer_edit, name="admin-trainer-edit"),
     path("admin/trainers/<int:pk>/toggle/", account_views.admin_trainer_toggle, name="admin-trainer-toggle"),
+=======
+    path("places/", include("places.urls")),
+    path("scheduling/", include("scheduling.urls")),
+    path("reviews/", include("reviews.urls")),
+    path("admin/console/", account_views.admin_console_view, name="admin-console"),
+>>>>>>> origin/kanayradeeva010
     path("admin/slots/", account_views.admin_slots_list, name="admin-slots"),
     path("admin/slots/new/", account_views.admin_slot_create, name="admin-slot-create"),
     path("admin/slots/<int:pk>/edit/", account_views.admin_slot_edit, name="admin-slot-edit"),

@@ -6,4 +6,7 @@ psycopg2-binary
 requests
 urllib3
 python-dotenv
+<<<<<<< HEAD
 coverage
+=======
+>>>>>>> origin/kanayradeeva010

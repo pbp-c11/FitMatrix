@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from django import forms
 
+<<<<<<< HEAD
 from django.utils import timezone
 
 from .models import Booking, SessionSlot, Trainer
+=======
+from .models import SessionSlot
+>>>>>>> origin/kanayradeeva010
 
 
 class SessionSlotForm(forms.ModelForm):
@@ -23,6 +27,7 @@ class SessionSlotForm(forms.ModelForm):
         if start and end and end <= start:
             self.add_error("end", "End time must be after start time.")
         return cleaned
+<<<<<<< HEAD
 
 
 class TrainerForm(forms.ModelForm):
@@ -97,3 +102,5 @@ class BookingRescheduleForm(forms.Form):
         ):
             raise forms.ValidationError("You already have this slot booked.")
         return slot
+=======
+>>>>>>> origin/kanayradeeva010

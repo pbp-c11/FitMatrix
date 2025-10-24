@@ -6,6 +6,10 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+<<<<<<< HEAD
+=======
+from places.models import Place
+>>>>>>> origin/kanayradeeva010
 from django.utils.translation import gettext_lazy as _
 
 
@@ -73,6 +77,21 @@ class ActivityLog(models.Model):
         return f"{self.user} -> {self.get_type_display()}"
 
 
+<<<<<<< HEAD
+=======
+class WishlistCollection(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class CollectionItem(models.Model):
+    collection = models.ForeignKey(WishlistCollection, on_delete=models.CASCADE, related_name="items")
+    place = models.ForeignKey(Place, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+
+>>>>>>> origin/kanayradeeva010
 class WishlistItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     place = models.ForeignKey(
@@ -118,6 +137,7 @@ class WishlistItem(models.Model):
     def __str__(self) -> str:
         target = self.place or self.trainer
         return f"Wishlist({self.user} -> {target})"
+<<<<<<< HEAD
 
 
 class WishlistCollection(models.Model):
@@ -145,3 +165,5 @@ class CollectionItem(models.Model):
 
     def __str__(self) -> str:
         return f"{self.collection} -> {self.place}"
+=======
+>>>>>>> origin/kanayradeeva010

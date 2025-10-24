@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 .env
 .env.prod
 
+=======
+>>>>>>> origin/kanayradeeva010
 # Django
 *.log
 *.pot

@@ -63,6 +63,7 @@ class BookingRulesTests(TestCase):
                 user=self.user, type=ActivityLog.Types.BOOKING_CANCELLED
             ).exists()
         )
+<<<<<<< HEAD
 
     def test_cancel_by_admin_sets_flag_once(self) -> None:
         booking = Booking.objects.create(user=self.user, slot=self.slot)
@@ -102,3 +103,5 @@ class BookingRulesTests(TestCase):
             type=ActivityLog.Types.BOOKING_CREATED,
         )
         self.assertEqual(log.meta["booking_id"], booking.pk)
+=======
+>>>>>>> origin/kanayradeeva010

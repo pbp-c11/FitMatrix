@@ -3,8 +3,11 @@ from __future__ import annotations
 from io import BytesIO
 from typing import Any
 
+<<<<<<< HEAD
 import re
 
+=======
+>>>>>>> origin/kanayradeeva010
 from django import forms
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
@@ -18,8 +21,11 @@ except ModuleNotFoundError:  # pragma: no cover - fallback when Pillow missing
     Image = None  # type: ignore[assignment]
     ImageOps = None  # type: ignore[assignment]
 
+<<<<<<< HEAD
 from places.models import Place
 
+=======
+>>>>>>> origin/kanayradeeva010
 from .models import User
 
 AVATAR_MAX_SIZE_MB = 2
@@ -122,6 +128,7 @@ class RegisterForm(AvatarProcessingMixin, UserCreationForm):
         return user
 
 
+<<<<<<< HEAD
 class AdminUserCreationForm(UserCreationForm):
     email = forms.EmailField()
     display_name = forms.CharField(max_length=100, required=False)
@@ -164,6 +171,8 @@ class AdminUserCreationForm(UserCreationForm):
         return user
 
 
+=======
+>>>>>>> origin/kanayradeeva010
 class LoginForm(forms.Form):
     identifier = forms.CharField(label=_("Username or email"))
     password = forms.CharField(widget=forms.PasswordInput)
@@ -257,6 +266,7 @@ class AccessiblePasswordChangeForm(PasswordChangeForm):
     def full_clean(self) -> None:
         super().full_clean()
         self._update_aria()
+<<<<<<< HEAD
 
 
 class AdminPlaceForm(forms.ModelForm):
@@ -328,3 +338,5 @@ class AdminPlaceForm(forms.ModelForm):
     def clean_gallery(self) -> list[str]:
         gallery = self.cleaned_data.get("gallery", "")
         return self._split_value(gallery)
+=======
+>>>>>>> origin/kanayradeeva010

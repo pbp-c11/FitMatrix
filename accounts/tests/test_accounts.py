@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import io
+<<<<<<< HEAD
 import json
+=======
+>>>>>>> origin/kanayradeeva010
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
@@ -10,7 +13,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
+<<<<<<< HEAD
 from accounts.models import ActivityLog, WishlistCollection, WishlistItem
+=======
+from accounts.models import ActivityLog, WishlistItem
+>>>>>>> origin/kanayradeeva010
 from places.models import Place
 
 User = get_user_model()
@@ -84,17 +91,26 @@ class AccountsTests(TestCase):
         )
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.post(
+<<<<<<< HEAD
             reverse("wishlist:toggle", args=("place", place.id)),
+=======
+            reverse("accounts:wishlist-toggle", args=("place", place.id)),
+>>>>>>> origin/kanayradeeva010
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertJSONEqual(response.content, {"status": "added"})
         self.assertTrue(WishlistItem.objects.filter(user=self.user, place=place).exists())
         response = self.client.post(
+<<<<<<< HEAD
             reverse("wishlist:toggle", args=("place", place.id)),
+=======
+            reverse("accounts:wishlist-toggle", args=("place", place.id)),
+>>>>>>> origin/kanayradeeva010
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertJSONEqual(response.content, {"status": "removed"})
 
+<<<<<<< HEAD
     def test_create_collection_and_add_place(self) -> None:
         place = Place.objects.create(
             name="Ride Lab",
@@ -121,6 +137,8 @@ class AccountsTests(TestCase):
         self.assertEqual(collection.items.count(), 1)
         self.assertTrue(WishlistItem.objects.filter(user=self.user, place=place).exists())
 
+=======
+>>>>>>> origin/kanayradeeva010
     def test_admin_permission_required(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse("admin-console"))

@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from django.db import models
 from django.utils.text import slugify
+<<<<<<< HEAD
 from django.conf import settings
 from django.db import models
+=======
+>>>>>>> origin/kanayradeeva010
 
 
 class PlaceQuerySet(models.QuerySet):
@@ -132,6 +135,7 @@ class Place(models.Model):
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
         return value
+<<<<<<< HEAD
 
 class Review(models.Model):
     place = models.ForeignKey("Place", on_delete=models.CASCADE, related_name="reviews")
@@ -168,3 +172,5 @@ class ReviewLike(models.Model):
     class Meta:
         unique_together = ("review", "user")
         indexes = [models.Index(fields=["review"])]
+=======
+>>>>>>> origin/kanayradeeva010

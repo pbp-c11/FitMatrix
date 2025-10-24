@@ -27,7 +27,11 @@ class PlaceServiceTests(TestCase):
             tagline="Boutique studio",
             summary="Mindful movement.",
             address="Jl. Sudirman No. 2",
+<<<<<<< HEAD
             city="Bandung",
+=======
+            city="Jakarta",
+>>>>>>> origin/kanayradeeva010
             facility_type=Place.FacilityType.STUDIO,
             amenities=["Yoga", "Pilates"],
             highlight_score=6,
@@ -69,6 +73,7 @@ class PlaceServiceTests(TestCase):
         results = list(recommended_places())
         self.assertLessEqual(results.index(self.pool), results.index(self.gym))
         self.assertNotIn(self.studio, results[:1])  # lower highlight score
+<<<<<<< HEAD
 
     def test_search_by_amenities_and_city(self) -> None:
         results = search_places(amenities=["Yoga"], city="Bandung")
@@ -86,3 +91,5 @@ class PlaceServiceTests(TestCase):
         ordered = list(search_places())
         # ensure default ordering uses highlight then rating/likes
         self.assertEqual(ordered[0], self.pool)
+=======
+>>>>>>> origin/kanayradeeva010

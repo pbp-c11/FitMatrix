@@ -1,7 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
+<<<<<<< HEAD
 from .models import ActivityLog, CollectionItem, User, WishlistCollection, WishlistItem
+=======
+from .models import ActivityLog, User, WishlistItem
+>>>>>>> origin/kanayradeeva010
 
 
 @admin.register(User)
@@ -30,6 +34,7 @@ class WishlistItemAdmin(admin.ModelAdmin):
     list_display = ("user", "place", "trainer", "created_at")
     list_filter = ("created_at",)
     search_fields = ("user__username", "place__name", "trainer__name")
+<<<<<<< HEAD
 
 
 @admin.register(WishlistCollection)
@@ -44,3 +49,5 @@ class CollectionItemAdmin(admin.ModelAdmin):
     list_display = ("collection", "place", "added_at")
     search_fields = ("collection__name", "place__name")
     list_filter = ("added_at",)
+=======
+>>>>>>> origin/kanayradeeva010

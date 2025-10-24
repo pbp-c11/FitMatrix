@@ -57,6 +57,7 @@ class ReviewVisibilityTests(TestCase):
         review.save(update_fields=["is_visible", "rating"])
         self.trainer.refresh_from_db()
         self.assertEqual(self.trainer.rating_avg, 3)
+<<<<<<< HEAD
 
     def test_delete_review_updates_trainer_average(self) -> None:
         other_user = User.objects.create_user(
@@ -87,3 +88,5 @@ class ReviewVisibilityTests(TestCase):
         first.delete()
         self.trainer.refresh_from_db()
         self.assertEqual(self.trainer.rating_avg, 0)
+=======
+>>>>>>> origin/kanayradeeva010
