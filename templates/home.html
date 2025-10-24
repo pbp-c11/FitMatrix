@@ -72,7 +72,7 @@
         </div>
         <div>
           <p class="text-[#09412D] font-semibold text-[64px] leading-none">{{ summary.trainer_count|default:0 }}</p>
-          <p class="text-[#09412D]/70 mt-2">10 certified trainers</p>
+          <p class="text-[#09412D]/70 mt-2">10+ certified trainers</p>
         </div>
       </div>
 
@@ -179,86 +179,38 @@
   </div>
 </section>
 
-<!-- ================= TRENDING ================= -->
-<section class="relative max-w-[1200px] mx-auto px-6 mt-24 pb-24 space-y-8 overflow-visible">
-<div class="relative flex items-center gap-4">
-  <span class="h-[8px] w-10 rounded-full bg-[#B5EB54] translate-y-[0.2rem]"></span>
-  <h2 class="text-[#09412D] font-['Palanquin Dark'] text-[40px] sm:text-[44px] font-extrabold">
-    Trending Coordinates
-  </h2>
-</div>
+<!-- TRENDING COORDINATES -->
+<section class="relative max-w-6xl mx-auto px-6 mt-24 space-y-8">
+  <!-- Judul -->
+  <div class="relative flex items-center gap-4">
+    <span class="h-[8px] w-10 rounded-full bg-[#B5EB54] translate-y-[0.2rem]"></span>
+    <h2 class="text-[#09412D] font-['Palanquin Dark'] text-[40px] sm:text-[44px] font-extrabold">
+      Trending Coordinates
+    </h2>
+  </div>
 
-
-  <div class="relative grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-    {% for place in trending_places %}
-      <article class="rounded-[50px] border border-black/10 shadow-sm overflow-hidden matrix-card-bg">
-        <div class="relative">
-          {% if place.main_image %}
-            <img src="{{ place.main_image.url }}" alt="{{ place.name }}"
-                 class="w-full h-56 object-cover rounded-t-[50px]" />
-          {% else %}
-            <img src="https://placehold.co/642x361" alt="{{ place.name }}"
-                 class="w-full h-56 object-cover rounded-t-[50px]" />
-          {% endif %}
-          <span class="absolute left-4 top-4 px-5 py-2 rounded-full border-2 border-[#2C7F4F] bg-white/70 font-[Koulen] tracking-[0.3em]">POOL</span>
-        </div>
-
-        <div class="p-6 space-y-3">
-          <div class="flex items-center justify-between text-[#0D5821]/70 text-[15px]">
-            <span>{{ place.city|default:"" }}</span>
-            <span>Rating {{ place.rating_avg|default:place.rating|default:"-" }}</span>
-          </div>
-          <h3 class="text-[#0D5821] font-['Palanquin Dark'] text-[26px]">{{ place.name }}</h3>
-          <p class="text-black/70 text-[14.5px] leading-relaxed">
-            {{ place.summary|default:"Olympic-size hydro training hub with recovery plunge labs" }}
-          </p>
-        </div>
-      </article>
-    {% empty %}
-      <p class="text-[#032304]/70">Belum ada data trending.</p>
-    {% endfor %}
+  <!-- Grid tempat -->
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% include "places/_cards.html" with places=trending_places %}
   </div>
 </section>
 
-<!-- ================= NEWEST ================= -->
-<section class="relative max-w-[1200px] mx-auto px-6 mt-24 pb-24 space-y-8 overflow-visible">
-<div class="relative flex items-center gap-4">
-  <span class="h-[8px] w-10 rounded-full bg-[#B5EB54] translate-y-[0.2rem]"></span>
-  <h2 class="text-[#09412D] font-['Palanquin Dark'] text-[40px] sm:text-[44px] font-extrabold">
-    Newest In the FitMatrix
-  </h2>
-</div>
 
 
-  <div class="relative grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-    {% for place in newest_places %}
-      <article class="rounded-[50px] border border-black/10 shadow-sm overflow-hidden matrix-card-bg">
-        <div class="relative">
-          {% if place.main_image %}
-            <img src="{{ place.main_image.url }}" alt="{{ place.name }}"
-                 class="w-full h-56 object-cover rounded-t-[50px]" />
-          {% else %}
-            <img src="https://placehold.co/642x361" alt="{{ place.name }}"
-                 class="w-full h-56 object-cover rounded-t-[50px]" />
-          {% endif %}
-          <span class="absolute left-4 top-4 px-5 py-2 rounded-full border-2 border-[#2C7F4F] bg-white/70 font-[Koulen] tracking-[0.3em]">POOL</span>
-        </div>
+<!-- NEWEST IN THE FITMATRIX -->
+<section class="relative max-w-6xl mx-auto px-6 mt-20 space-y-8">
+  <div class="relative flex items-center gap-4">
+    <span class="h-[8px] w-10 rounded-full bg-[#B5EB54] translate-y-[0.2rem]"></span>
+    <h2 class="text-[#09412D] font-['Palanquin Dark'] text-[40px] sm:text-[44px] font-extrabold">
+      Newest In the FitMatrix
+    </h2>
+  </div>
 
-        <div class="p-6 space-y-3">
-          <div class="flex items-center justify-between text-[#0D5821]/70 text-[15px]">
-            <span>{{ place.city|default:"" }}</span>
-            <span>Rating {{ place.rating_avg|default:place.rating|default:"-" }}</span>
-          </div>
-          <h3 class="text-[#0D5821] font-['Palanquin Dark'] text-[26px]">{{ place.name }}</h3>
-          <p class="text-black/70 text-[14.5px] leading-relaxed">
-            {{ place.summary|default:"Premium multi-zone facility." }}
-          </p>
-        </div>
-      </article>
-    {% empty %}
-      <p class="text-[#032304]/70">Belum ada venue baru.</p>
-    {% endfor %}
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% include "places/_cards.html" with places=newest_places %}
   </div>
 </section>
+
+
 
 {% endblock %}

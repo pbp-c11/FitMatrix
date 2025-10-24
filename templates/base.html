@@ -44,6 +44,20 @@
             <a class="nav-underline" href="{{ search_url }}" {% if match and match.app_name == 'search' %}aria-current="page"{% endif %}>Places</a>
             <a href="{{ sessions_url }}" {% if match and match.app_name == 'scheduling' and url_name|slice:':7' != 'booking' %}aria-current="page"{% endif %}>Trainers</a>
             <a href="{{ wishlist_url }}" {% if match and match.url_name == 'list' %}aria-current="page"{% endif %}>Wishlist</a>
+
+            {# ==== ADMIN PANEL (Desktop) ==== #}
+            {% if request.user.is_authenticated %}
+              {% if request.user.is_superuser or request.user.is_staff or request.user.is_admin %}
+                {% url 'accounts:admin-console' as admin_console_url %}
+                {% with admin_pages=' admin-console admin-users admin-places admin-place-create admin-place-edit admin-trainers admin-trainer-create admin-trainer-edit admin-slots admin-slot-create admin-slot-edit admin-bookings admin-reviews ' %}
+                  <a class="nav-underline"
+                     href="{{ admin_console_url }}"
+                     {% if ' '|add:url_name|add:' ' in admin_pages %}aria-current="page"{% endif %}>
+                    Admin panel
+                  </a>
+                {% endwith %}
+              {% endif %}
+            {% endif %}
           </nav>
 
           <!-- Right actions -->
@@ -76,7 +90,12 @@
             <a href="{% url 'search:results' %}" class="nav-underline">Places</a>
             <a href="{% url 'scheduling:sessions' %}">Trainers</a>
             <a href="{% url 'wishlist:list' %}">Wishlist</a>
+
+            {# ==== ADMIN PANEL (Mobile) ==== #}
             {% if request.user.is_authenticated %}
+              {% if request.user.is_superuser or request.user.is_staff or request.user.is_admin %}
+                <a href="{% url 'accounts:admin-console' %}">Admin panel</a>
+              {% endif %}
               <a href="{% url 'scheduling:booking-manage' %}">Bookings</a>
               <a href="{% url 'accounts:profile' %}">Profile</a>
             {% else %}
@@ -93,79 +112,66 @@
         </div>
       </main>
 
-      
-<!-- FOOTER (fix overlap + force white contact) -->
-<footer class="bg-[#052315] text-[#EAF8F0] mt-24 border-t border-[#145734]/40">
-  <div class="max-w-6xl mx-auto px-6 py-14">
-    <!-- Grid 12 kolom: Brand 4, lainnya 2 -->
-    <div class="grid grid-cols-1 sm:grid-cols-12 gap-y-10 gap-x-12 xl:gap-x-16 items-start">
-      <!-- Brand -->
-      <div class="sm:col-span-4">
-        <div class="flex items-center gap-3 mb-5">
-          <!-- kalau logo sudah putih, hapus 'filter invert' -->
-          <img src="{% static 'img/logo-mark.png' %}" alt="FitMatrix Logo" class="w-10 h-10 object-contain filter invert" />
-          <span class="text-[30px] tracking-[0.3em] font-[Koulen] whitespace-nowrap">
-            FitMatrix
-          </span>
+      <!-- FOOTER -->
+      <footer class="bg-[#052315] text-[#EAF8F0] mt-24 border-t border-[#145734]/40">
+        <div class="max-w-6xl mx-auto px-6 py-14">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-y-10 gap-x-12 xl:gap-x-16 items-start">
+            <div class="sm:col-span-4">
+              <div class="flex items-center gap-3 mb-5">
+                <img src="{% static 'img/logo-mark.png' %}" alt="FitMatrix Logo" class="w-10 h-10 object-contain filter invert" />
+                <span class="text-[30px] tracking-[0.3em] font-[Koulen] whitespace-nowrap">FitMatrix</span>
+              </div>
+              <p class="text-white/85 leading-relaxed text-[15px]">Curated fitness ecosystems for Jakarta and beyond.</p>
+            </div>
+
+            <div class="sm:col-span-2">
+              <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">COMPANY</h4>
+              <p class="text-white/85 text-[15px] leading-relaxed">
+                Jalan Pondok Cina No. 1<br/>Universitas Indonesia
+              </p>
+              <p class="mt-3 text-[15px] leading-relaxed !text-white">
+                <span class="!text-white">Contact us:</span><br/>
+                <a href="mailto:admin@fitmatrix.id" class="underline decoration-dotted !text-white hover:!text-white transition">
+                  admin@fitmatrix.id
+                </a>
+              </p>
+            </div>
+
+            <div class="sm:col-span-2">
+              <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">PRODUCTS</h4>
+              <ul class="space-y-2 text-white/85 text-[15px]">
+                <li><a href="{% url 'search:results' %}" class="hover:text-white transition">Venues</a></li>
+                <li><a href="{% url 'scheduling:sessions' %}" class="hover:text-white transition">Trainers</a></li>
+              </ul>
+            </div>
+
+            <div class="sm:col-span-2">
+              <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">REFERENCE</h4>
+              <ul class="space-y-2 text-white/85 text-[15px]">
+                <li>
+                  <a href="https://docs.google.com/document/d/1ueQeJeebFoYu8T8pDJQ8Qm3Dz6r5DNgNzy3byXfRNrc/edit?usp=sharing"
+                     target="_blank" rel="noopener noreferrer"
+                     class="underline decoration-dotted hover:text-white transition">
+                    References
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="sm:col-span-2">
+              <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">SUPPORTED BY</h4>
+              <p class="text-white/85 text-[15px]">Fasilkom UI</p>
+            </div>
+          </div>
         </div>
-        <p class="text-white/85 leading-relaxed text-[15px]">
-          Curated fitness ecosystems for Jakarta and beyond.
-        </p>
-      </div>
 
-      <!-- COMPANY -->
-      <div class="sm:col-span-2">
-        <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">COMPANY</h4>
-        <p class="text-white/85 text-[15px] leading-relaxed">
-          Jalan Pondok Cina No. 1<br>Universitas Indonesia
-        </p>
-        <p class="mt-3 text-[15px] leading-relaxed !text-white">
-          <span class="!text-white">Contact us:</span><br>
-          <a href="mailto:admin@fitmatrix.id"
-             class="underline decoration-dotted !text-white hover:!text-white transition">
-            admin@fitmatrix.id
-          </a>
-        </p>
-      </div>
+        <div class="border-t border-white/10">
+          <div class="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-white/65">
+            <p>&copy; {% now "Y" %} FitMatrix. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
 
-      <!-- PRODUCTS -->
-      <div class="sm:col-span-2">
-        <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">PRODUCTS</h4>
-        <ul class="space-y-2 text-white/85 text-[15px]">
-          <li><a href="{% url 'search:results' %}" class="hover:text-white transition">Venues</a></li>
-          <li><a href="{% url 'scheduling:sessions' %}" class="hover:text-white transition">Trainers</a></li>
-        </ul>
-      </div>
-
-      <!-- REFERENCE -->
-      <div class="sm:col-span-2">
-        <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">REFERENCE</h4>
-        <ul class="space-y-2 text-white/85 text-[15px]">
-          <li>
-            <a href="https://docs.google.com/document/d/1ueQeJeebFoYu8T8pDJQ8Qm3Dz6r5DNgNzy3byXfRNrc/edit?usp=sharing" target="_blank" rel="noopener noreferrer"
-               class="underline decoration-dotted hover:text-white transition">
-              References
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- SUPPORTED BY -->
-      <div class="sm:col-span-2">
-        <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">SUPPORTED BY</h4>
-        <p class="text-white/85 text-[15px]">Fasilkom UI</p>
-      </div>
     </div>
-  </div>
-
-  <!-- Bottom bar -->
-  <div class="border-t border-white/10">
-    <div class="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-white/65">
-      <p>&copy; {% now "Y" %} FitMatrix. All rights reserved.</p>
-    </div>
-  </div>
-</footer>
-
-
   </body>
 </html>
