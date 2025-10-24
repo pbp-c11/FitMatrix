@@ -13,11 +13,17 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 from reviews.models import Review
 from scheduling.forms import SessionSlotForm, TrainerForm
 from scheduling.models import Booking, SessionSlot, Trainer
 from places.models import Place
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
+from .models import WishlistCollection
 
 from .forms import (
     AccessiblePasswordChangeForm,
@@ -36,6 +42,47 @@ THROTTLE_DELAY = 2
 
 def is_admin(user: User) -> bool:
     return user.is_authenticated and user.is_admin
+
+
+@login_required
+def wishlist_page(request):
+    collections = (
+        WishlistCollection.objects.filter(user=request.user)
+        .filter(user=request.user)
+        .prefetch_related("items__place") # biar ngambil semua tempat
+        .order_by("name")
+    )
+    return render(
+        request,
+        "accounts/wishlist_page.html",
+        {"collections": collections},
+    )
+
+@login_required
+def delete_collection_view(request, pk):
+    """AJAX-friendly delete endpoint"""
+    if request.method == "POST":
+        collection = get_object_or_404(WishlistCollection, pk=pk, user=request.user)
+        collection.delete()
+        return JsonResponse({"success": True})
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required
+def delete_collection_item_view(request, pk):
+    if request.method == "POST":
+        item = get_object_or_404(WishlistItem, pk=pk, collection__user=request.user)
+        item.delete()
+        return JsonResponse({"success": True})
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required
+def wishlist_collection_detail(request, pk):
+    collection = get_object_or_404(WishlistCollection, pk=pk, user=request.user)
+    items = collection.items.select_related("place")
+    return render(request, "accounts/wishlist_collection_detail.html", {
+        "collection": collection,
+        "items": items,
+    })
 
 
 def register_view(request: HttpRequest) -> HttpResponse:
@@ -117,100 +164,56 @@ def get_user_collections(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@csrf_exempt
 @require_POST
-def create_collection_view(request: HttpRequest) -> JsonResponse:
-    if (response := _require_ajax(request)) is not None:
-        return response
-    payload, error = _load_json(request)
-    if error:
-        return error
+def create_collection_view(request):
+    import json
+    data = json.loads(request.body)
+    name = data.get("name")
+    description = data.get("description", "")
+    place_id = data.get("place_id")
 
-    name = str(payload.get("name", "")).strip()
-    description = str(payload.get("description", "")).strip()
-    place_id = payload.get("place_id")
-
-    if not name:
-        return JsonResponse({"error": "Collection name is required."}, status=400)
-    if not place_id:
-        return JsonResponse({"error": "Place is required."}, status=400)
-
-    place = get_object_or_404(Place, pk=place_id)
+    # Buat / ambil koleksi
     collection, created = WishlistCollection.objects.get_or_create(
         user=request.user,
         name=name,
         defaults={"description": description},
     )
 
-    if not created and description and collection.description != description:
-        collection.description = description
-        collection.save(update_fields=["description"])
-
-    if CollectionItem.objects.filter(collection=collection, place=place).exists():
-        return JsonResponse(
-            {
-                "status": "exists",
-                "collection": {"id": collection.pk, "name": collection.name},
-            }
+    if place_id:
+        place = get_object_or_404(Place, pk=place_id)
+        CollectionItem.objects.get_or_create(
+            collection=collection,
+            place=place
         )
 
-    CollectionItem.objects.create(collection=collection, place=place)
-    WishlistItem.objects.get_or_create(user=request.user, place=place)
-    ActivityLog.objects.create(
-        user=request.user,
-        type=ActivityLog.Types.WISHLIST_ADDED,
-        meta={"collection": collection.pk, "place": place.pk},
-    )
-    return JsonResponse(
-        {
-            "status": "added",
-            "collection": {"id": collection.pk, "name": collection.name},
-        }
-    )
+    return JsonResponse({
+        "status": "added",
+        "collection": {"id": collection.id, "name": collection.name}
+    })
 
 
 @login_required
+@csrf_exempt
 @require_POST
-def add_to_collection_view(request: HttpRequest) -> JsonResponse:
-    if (response := _require_ajax(request)) is not None:
-        return response
-    payload, error = _load_json(request)
-    if error:
-        return error
+def add_to_collection_view(request):
+    import json
+    data = json.loads(request.body)
+    collection_id = data.get("collection_id")
+    place_id = data.get("place_id")
 
-    collection_id = payload.get("collection_id")
-    place_id = payload.get("place_id")
-
-    if not collection_id or not place_id:
-        return JsonResponse(
-            {"error": "Both collection_id and place_id are required."}, status=400
-        )
-
-    collection = get_object_or_404(
-        WishlistCollection, pk=collection_id, user=request.user
-    )
+    collection = get_object_or_404(WishlistCollection, pk=collection_id, user=request.user)
     place = get_object_or_404(Place, pk=place_id)
 
-    if CollectionItem.objects.filter(collection=collection, place=place).exists():
-        return JsonResponse(
-            {
-                "status": "exists",
-                "collection": {"id": collection.pk, "name": collection.name},
-            }
-        )
+    CollectionItem.objects.get_or_create(
+        collection=collection,
+        place=place
+    )
 
-    CollectionItem.objects.create(collection=collection, place=place)
-    WishlistItem.objects.get_or_create(user=request.user, place=place)
-    ActivityLog.objects.create(
-        user=request.user,
-        type=ActivityLog.Types.WISHLIST_ADDED,
-        meta={"collection": collection.pk, "place": place.pk},
-    )
-    return JsonResponse(
-        {
-            "status": "added",
-            "collection": {"id": collection.pk, "name": collection.name},
-        }
-    )
+    return JsonResponse({
+        "status": "added",
+        "collection": {"id": collection.id, "name": collection.name}
+    })
 
 
 @login_required

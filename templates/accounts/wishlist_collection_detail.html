@@ -1,49 +1,93 @@
 {% extends "base.html" %}
-{% block title %}{{ collection.name }} · Wishlist · FitMatrix{% endblock %}
-{% block content %}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 pb-20 space-y-10">
-  <header class="matrix-glass matrix-glow px-6 sm:px-8 py-10 rounded-[30px] space-y-4">
-    <p class="matrix-label">Wishlist collection</p>
-    <h1 class="text-3xl font-semibold">{{ collection.name }}</h1>
-    {% if collection.description %}
-      <p class="text-forest-muted">{{ collection.description }}</p>
-    {% endif %}
-    <a href="{% url 'wishlist:list' %}" class="matrix-link">Back to wishlist</a>
-  </header>
+{% block title %}{{ collection.name }} | FitMatrix{% endblock %}
 
-  <div class="space-y-4">
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 py-10">
+  <a href="{% url 'accounts:wishlist_page' %}"
+     class="text-sm text-[#0E3A22] hover:text-[#145734] underline mb-6 inline-block">
+    ← Back to Wishlist Collections
+  </a>
+
+  <!-- Header -->
+
+<div class="mt-6 mb-8">
+  <h1 class="text-2xl font-bold text-[#0E3A22] mb-2">{{ collection.name }}</h1>
+  {% if collection.description %}
+    <p class="text-[#497D5E] text-sm">{{ collection.description }}</p>
+  {% endif %}
+</div>
+
+
+  <!-- Items grid -->
+  {% if items %}
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
     {% for item in items %}
-      <article class="matrix-card" data-variant="glass">
-        <div class="matrix-card__body space-y-3">
-          <p class="matrix-meta-label">{{ item.place.city }}</p>
-          <h2 class="matrix-card__title">{{ item.place.name }}</h2>
-          <p class="text-sm text-forest-muted">{{ item.place.summary|truncatewords:24 }}</p>
-          <div class="flex items-center justify-between gap-4">
-            <a href="{{ item.place.get_absolute_url }}" class="matrix-btn" data-variant="ghost">View place</a>
-            <form method="post" action="{% url 'accounts:delete-collection-item' item.pk %}" data-collection-item-form>
-              {% csrf_token %}
-              <button type="submit" class="matrix-btn" data-variant="ghost">Remove</button>
-            </form>
-          </div>
-        </div>
-      </article>
-    {% empty %}
-      <p class="text-white/70">No places saved yet.</p>
+    <div class="rounded-3xl bg-white/70 border border-[#C9FFD4] shadow-sm p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-md">
+      <div>
+        <h3 class="text-lg font-semibold text-[#12391E] mb-1">{{ item.place.name }}</h3>
+        <p class="text-sm text-[#497D5E]">{{ item.place.city }}</p>
+      </div>
+      <div class="flex justify-between items-center mt-6 pt-4 border-t border-[#E0F2E9]">
+        <a href="{% url 'places:detail' item.place.slug %}"
+           class="text-sm font-medium text-[#0E3A22] underline hover:text-[#145734]">
+          View Place
+        </a>
+        <button type="button"
+                class="text-sm text-red-500 hover:underline remove-btn"
+                data-url="{% url 'accounts:delete_collection_item' item.id %}">
+          Remove
+        </button>
+      </div>
+    </div>
     {% endfor %}
   </div>
+  {% else %}
+    <p class="text-gray-500 mt-8 text-center">This collection doesn’t have any places yet.</p>
+  {% endif %}
 </section>
-{% endblock %}
-{% block extra_js %}
+
+<!-- Toast notification -->
+<div id="toast"
+     class="hidden fixed top-6 right-6 px-4 py-3 rounded-xl text-sm font-medium shadow-md border z-[9999] pointer-events-none">
+</div>
+
 <script>
-  document.querySelectorAll('[data-collection-item-form]').forEach((form) => {
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      fetch(form.action, {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        body: new FormData(form)
-      }).then(() => window.location.reload());
+document.addEventListener("DOMContentLoaded", () => {
+  const toast = document.getElementById("toast");
+  const csrftoken = document.querySelector("[name=csrfmiddlewaretoken]")?.value;
+
+  function showToast(message, type = "success") {
+    toast.textContent = message;
+    toast.className = `fixed top-6 right-6 px-4 py-3 rounded-xl text-sm font-medium shadow-md border z-[9999] pointer-events-none ${
+      type === "error"
+        ? "bg-red-100 text-red-800 border-red-300"
+        : "bg-green-100 text-green-800 border-green-300"
+    }`;
+    toast.classList.remove("hidden");
+    setTimeout(() => toast.classList.add("hidden"), 2500);
+  }
+
+  document.querySelectorAll(".remove-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const card = btn.closest(".rounded-3xl");
+      const url = btn.dataset.url;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "X-CSRFToken": csrftoken, "Accept": "application/json" },
+        });
+        if (!res.ok) throw new Error("Failed");
+        card.style.opacity = "0";
+        card.style.transform = "scale(0.95)";
+        setTimeout(() => card.remove(), 300);
+        showToast("Place removed from collection.");
+      } catch {
+        showToast("Failed to remove place.", "error");
+      }
     });
   });
+});
 </script>
+
 {% endblock %}

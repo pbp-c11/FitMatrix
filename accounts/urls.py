@@ -1,8 +1,9 @@
 from __future__ import annotations
-
 from django.urls import path
 
+
 from .views import (
+    wishlist_page,
     DashboardPasswordChangeView,
     activity_history_view,
     add_to_collection_view,
@@ -34,18 +35,25 @@ from .views import (
     profile_edit_view,
     profile_view,
     register_view,
+    wishlist_collection_detail,
+    
 )
 
 app_name = "accounts"
 
 urlpatterns = [
+    # auth
     path("register/", register_view, name="register"),
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
+
+    # profile
     path("profile/", profile_view, name="profile"),
     path("profile/edit/", profile_edit_view, name="profile-edit"),
     path("password/", DashboardPasswordChangeView.as_view(), name="password"),
     path("history/", activity_history_view, name="history"),
+
+    # admin section
     path("admin/console/", admin_console_view, name="admin-console"),
     path("admin/users/", admin_users_list, name="admin-users"),
     path("admin/places/", admin_places_list, name="admin-places"),
@@ -65,17 +73,21 @@ urlpatterns = [
     path("admin/bookings/<int:pk>/cancel/", admin_booking_cancel, name="admin-booking-cancel"),
     path("admin/reviews/", admin_reviews_list, name="admin-reviews"),
     path("admin/reviews/<int:pk>/toggle/", admin_review_toggle, name="admin-review-toggle"),
+
+    # collections API (AJAX)
     path("collections/create/", create_collection_view, name="create-collection"),
     path("collections/add/", add_to_collection_view, name="add-to-collection"),
     path("collections/list/", get_user_collections, name="get-user-collections"),
-    path(
-        "collections/<int:pk>/delete/",
-        delete_collection_view,
-        name="delete-collection",
-    ),
-    path(
-        "collections/item/<int:pk>/delete/",
-        delete_collection_item_view,
-        name="delete-collection-item",
-    ),
+    path("collections/item/<int:pk>/delete/", delete_collection_item_view, name="delete-collection-item"),
+
+    # wishlist detail page
+    path("wishlist/collection/<int:pk>/", wishlist_collection_detail, name="wishlist_collection_detail"),
+    path("wishlist/collection/item/<int:pk>/delete/", delete_collection_item_view, name="delete_collection_item"),
+    path("wishlist/", wishlist_page, name="wishlist_page"),
+    path("collections/<int:pk>/delete/", delete_collection_view, name="delete_collection"),
+    path("wishlist/collection/item/<int:pk>/delete/", delete_collection_item_view, name="delete_collection_item"),
+
+
+
+
 ]

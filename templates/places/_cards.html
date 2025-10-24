@@ -1,44 +1,60 @@
 {% load static %}
 {% for place in places %}
-  <article class="matrix-card">
-    {% with image=place.hero_image|default:'media/studio-flow.jpg' %}
-      <div class="matrix-card__media">
+  <article class="bg-white/40 backdrop-blur-md rounded-2xl shadow-md overflow-hidden border border-white/30 hover:shadow-lg transition-all duration-200">
+    
+    <!-- Image -->
+    <div class="relative w-full h-48 overflow-hidden">
+      {% with image=place.hero_image|default:'media/studio-flow.jpg' %}
         {% if image and '://' in image %}
-          <img src="{{ image }}" alt="{{ place.name }}" loading="lazy" />
+          <img src="{{ image }}" alt="{{ place.name }}" class="w-full h-full object-cover" loading="lazy" />
         {% else %}
-          <img src="{% static image %}" alt="{{ place.name }}" loading="lazy" />
+          <img src="{% static image %}" alt="{{ place.name }}" class="w-full h-full object-cover" loading="lazy" />
         {% endif %}
-        <span class="matrix-card__badge">{{ place.facility_type }}</span>
-      </div>
-    {% endwith %}
-    <div class="matrix-card__body">
-      <div class="matrix-card__meta">
+      {% endwith %}
+      <span class="absolute top-3 left-3 bg-[#C9FFD4] text-[#083D2F] text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
+        {{ place.facility_type|default:"GYM" }}
+      </span>
+    </div>
+
+    <!-- Card Body -->
+    <div class="p-5 flex flex-col gap-3">
+      <div class="text-sm text-[#2D4031] flex flex-wrap justify-between">
         <span>{{ place.city }}</span>
-        <span>{{ place.price_display }}</span>
-        <span>Rating {{ place.rating_avg|floatformat:1 }}</span>
+        <span class="opacity-70">Rating {{ place.rating_avg|floatformat:1 }}</span>
       </div>
-      <h3 class="matrix-card__title">{{ place.name }}</h3>
-      <p class="text-forest-muted text-sm">{{ place.tagline|default:place.summary|truncatewords:22 }}</p>
-      <div class="matrix-card__amenities">
-        {% for amenity in place.amenities_list|slice:":4" %}
-          <span>{{ amenity }}</span>
+
+      <h3 class="text-lg font-semibold text-[#142C1D]">{{ place.name }}</h3>
+
+
+      <!-- Amenities -->
+      <div class="flex flex-wrap gap-2 mt-1">
+        {% for amenity in place.amenities_list|slice:":3" %}
+          <span class="bg-[#E7FFE9] text-[#0D4028] text-xs font-medium px-3 py-1 rounded-full">{{ amenity }}</span>
         {% empty %}
-          <span>Premium coaching</span>
-          <span>Recovery zone</span>
+          <span class="bg-[#E7FFE9] text-[#0D4028] text-xs font-medium px-3 py-1 rounded-full">Premium Coaching</span>
+          <span class="bg-[#E7FFE9] text-[#0D4028] text-xs font-medium px-3 py-1 rounded-full">Recovery Zone</span>
         {% endfor %}
       </div>
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <span class="matrix-price-tag">
-          {{ place.price_display }}
-          <span>per session</span>
-        </span>
-        <a href="{{ place.get_absolute_url }}" class="matrix-btn" data-variant="ghost">View space</a>
+
+      <!-- Price -->
+      <div class="mt-3 text-[#0A3B29] font-semibold">
+        {% if place.price_display %}
+          {{ place.price_display }} <span class="font-normal text-sm text-[#2D4031]">/ session</span>
+        {% else %}
+          Free Access
+        {% endif %}
       </div>
+
+      <!-- Button (ijo lebih terang) -->
+      <a href="{{ place.get_absolute_url }}"
+         class="mt-3 w-full text-center px-4 py-2 rounded-full bg-gradient-to-r from-[#8EEA6E] to-[#5DD65B] text-[#0B2A12] font-semibold text-sm hover:brightness-105 transition-all">
+        View Space
+      </a>
     </div>
   </article>
 {% empty %}
-  <div class="matrix-empty-state">
-    <h3>No spaces found</h3>
-    <p>Adjust your filters or explore another facility type to widen your results.</p>
+  <div class="text-center text-[#2B3B2D] py-12">
+    <h3 class="text-xl font-semibold">No spaces found</h3>
+    <p class="text-sm opacity-70">Try adjusting your filters or search another city.</p>
   </div>
 {% endfor %}

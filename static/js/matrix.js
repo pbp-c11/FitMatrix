@@ -1,3 +1,4 @@
+// static/js/matrix.js
 const matrix = (() => {
   const qs = (selector, root = document) => root.querySelector(selector);
   const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -17,6 +18,9 @@ const matrix = (() => {
     return cookie ? decodeURIComponent(cookie.split("=")[1]) : "";
   };
 
+  // ===============================
+  // MOBILE NAVIGATION
+  // ===============================
   const initMobileNav = () => {
     const toggle = qs("[data-mobile-toggle]");
     const menu = qs("[data-mobile-menu]");
@@ -31,15 +35,14 @@ const matrix = (() => {
     });
   };
 
+  // ===============================
+  // ASYNC SEARCH
+  // ===============================
   const updateSearchResults = (html, count) => {
     const target = qs("[data-search-results]");
     const countLabel = qs("[data-search-count]");
-    if (target) {
-      target.innerHTML = html;
-    }
-    if (countLabel) {
-      countLabel.textContent = String(count);
-    }
+    if (target) target.innerHTML = html;
+    if (countLabel) countLabel.textContent = String(count);
   };
 
   const serializeForm = (form) =>
@@ -86,21 +89,31 @@ const matrix = (() => {
     });
   };
 
+  // ===============================
+  // TOAST HANDLER (auto-dismiss)
+  // ===============================
   const initDismissibleToasts = () => {
-    qsa("[data-toast-dismiss]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const toast = button.closest("[data-toast]");
-        if (!toast) return;
+    const toasts = qsa("[data-toast]");
+    toasts.forEach((toast) => {
+      const dismiss = qs("[data-toast-dismiss]", toast);
+      if (dismiss) {
+        dismiss.addEventListener("click", () => {
+          toast.classList.add("matrix-toast--hiding");
+          toast.addEventListener("transitionend", () => toast.remove(), { once: true });
+        });
+      }
+
+      // Auto hide after 3s
+      setTimeout(() => {
         toast.classList.add("matrix-toast--hiding");
-        toast.addEventListener(
-          "transitionend",
-          () => toast.remove(),
-          { once: true },
-        );
-      });
+        toast.addEventListener("transitionend", () => toast.remove(), { once: true });
+      }, 3000);
     });
   };
 
+  // ===============================
+  // WISHLIST TOGGLE
+  // ===============================
   const updateWishlistButton = (button, isActive) => {
     button.dataset.active = isActive ? "true" : "false";
     if (button.hasAttribute("aria-pressed")) {
@@ -123,9 +136,7 @@ const matrix = (() => {
     const csrfToken = getCsrfToken();
 
     const handleToggle = async (button) => {
-      if (!button.dataset.url || button.dataset.loading === "true") {
-        return;
-      }
+      if (!button.dataset.url || button.dataset.loading === "true") return;
       button.dataset.loading = "true";
       try {
         const response = await fetch(button.dataset.url, {
@@ -135,20 +146,13 @@ const matrix = (() => {
             "X-Requested-With": "XMLHttpRequest",
           },
         });
-        if (!response.ok) {
-          throw new Error("Wishlist toggle failed");
-        }
+        if (!response.ok) throw new Error("Wishlist toggle failed");
         const payload = await response.json();
         const isActive = payload.status === "added";
         updateWishlistButton(button, isActive);
         document.dispatchEvent(
           new CustomEvent("wishlist:toggled", {
-            detail: {
-              button,
-              status: payload.status,
-              added: isActive,
-              payload,
-            },
+            detail: { button, status: payload.status, added: isActive, payload },
           }),
         );
       } catch (error) {
@@ -168,6 +172,9 @@ const matrix = (() => {
     });
   };
 
+  // ===============================
+  // INIT
+  // ===============================
   const init = () => {
     initMobileNav();
     initAsyncSearch();
@@ -179,3 +186,5 @@ const matrix = (() => {
 })();
 
 window.addEventListener("DOMContentLoaded", () => matrix.init());
+
+

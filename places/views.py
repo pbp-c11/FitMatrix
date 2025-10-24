@@ -13,11 +13,49 @@ from accounts.models import WishlistItem
 from .forms import ReviewForm
 from .models import Place, Review
 from .services import recommended_places
+from django.template.loader import render_to_string
 
 
 def place_list(request: HttpRequest) -> HttpResponse:
     """Backward-compatible shim pointing to the dedicated search app."""
     return search_results_view(request)
+
+@require_POST
+@login_required
+def place_review_create(request, slug: str):
+    """Submit review via AJAX dan balas partial list terbaru."""
+    mgr = getattr(Place.objects, "active", None)
+    place = get_object_or_404(mgr() if callable(mgr) else Place.objects.all(), slug=slug)
+
+    form = ReviewForm(request.POST)
+    if form.is_valid():
+        Review.objects.create(
+            place=place,
+            user=request.user,
+            rating=int(form.cleaned_data["rating"]),
+            body=form.cleaned_data.get("body", "").strip(),
+        )
+
+        reviews = _sorted_reviews_qs(place, sort="created_at", direction="desc")
+        html = render_to_string(
+            "places/_reviews.html",
+            {
+                "place": place,
+                "reviews": reviews,
+                "active_sort": "created_at",
+                "active_dir": "desc",
+            },
+            request=request,
+        )
+        return JsonResponse({"ok": True, "html": html, "count": reviews.count()})
+
+    # kirim error kalau form gak valid
+    errors_html = render_to_string(
+        "places/_review_form_errors.html",
+        {"form": form},
+        request=request,
+    )
+    return JsonResponse({"ok": False, "errors_html": errors_html}, status=400)
 
 
 @require_GET
@@ -32,6 +70,8 @@ def place_detail(request, slug: str):
     is_favorite = False
     if request.user.is_authenticated:
         is_favorite = WishlistItem.objects.filter(user=request.user, place=place).exists()
+    reviews = _sorted_reviews_qs(place, sort="created_at", direction="desc")
+
     return render(
         request,
         "places/detail.html",
@@ -40,6 +80,7 @@ def place_detail(request, slug: str):
             "recommended": recommended_places(limit=6),
             "nearby": nearby,
             "is_favorite": is_favorite,
+            "reviews": reviews,
         },
     )
 
@@ -93,6 +134,7 @@ def place_review_create(request, slug: str):
             rating=int(form.cleaned_data["rating"]),
             body=form.cleaned_data.get("body", "").strip(),
         )
+
         # setelah simpan, render ulang daftar review (default: terbaru duluan)
         reviews = _sorted_reviews_qs(place, sort="created_at", direction="desc")
         html = render(request, "places/_reviews.html", {
