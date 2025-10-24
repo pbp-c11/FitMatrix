@@ -1,0 +1,40 @@
+{# templates/places/_reviews.html #}
+
+{% if reviews %}
+  <div class="flex flex-wrap gap-2 mb-3" role="toolbar" aria-label="Filters">
+    <button class="matrix-btn text-sm !py-1 !px-2" data-variant="ghost" data-filter="rating" data-dir="desc"
+            aria-pressed="{% if active_sort == 'rating' %}true{% else %}false{% endif %}">
+      All reviews
+    </button>
+    <button class="matrix-btn text-sm !py-1 !px-2" data-variant="ghost" data-filter="created_at" data-dir="desc"
+            aria-pressed="{% if active_sort == 'created_at' and active_dir == 'desc' %}true{% else %}false{% endif %}">
+      Recent
+    </button>
+    <button class="matrix-btn text-sm !py-1 !px-2" data-variant="ghost" data-filter="liked" data-dir="desc"
+            aria-pressed="{% if active_sort == 'liked' %}true{% else %}false{% endif %}">
+      Most liked
+    </button>
+  </div>
+
+  <div class="space-y-3">
+    {% for r in reviews %}
+      <article class="matrix-glass matrix-shadow border border-transparent rounded-2xl p-5">
+        <div class="text-sm text-black/60 dark:text-white/60">
+          <strong>@{{ r.user.username }}</strong>
+          <span class="mx-1">&middot;</span>
+          Rating: {{ r.rating }}/5
+          <span class="mx-1">&middot;</span>
+          {{ r.created_at|date:"d M Y, H:i" }}
+        </div>
+        {% if r.body %}
+          <p class="mt-2 whitespace-pre-line">{{ r.body }}</p>
+        {% endif %}
+        <div class="mt-3 text-sm text-black/60 dark:text-white/60">
+          ❤️ {{ r.likes.count }} like{{ r.likes.count|pluralize }}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="opacity-70">No reviews yet.</p>
+{% endif %}
