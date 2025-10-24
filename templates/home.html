@@ -1,18 +1,198 @@
 {% extends "base.html" %}
-{% block title %}FitMatrix · Welcome{% endblock %}
+{% load static %}
+{% block title %}FitMatrix | Adaptive fitness ecosystems{% endblock %}
 {% block content %}
-<section class="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 md:py-24 animate-in">
-  <div class="glass card text-center space-y-6">
-    <h1 class="text-3xl md:text-5xl font-bold drop-shadow">Empower your fitness journey</h1>
-    <p class="text-white/80 max-w-2xl mx-auto">Discover curated places, connect with expert trainers, and stay on top of your schedule with a single holistic dashboard.</p>
-    <div class="flex flex-col sm:flex-row justify-center gap-4">
-      {% if request.user.is_authenticated %}
-        <a href="{% url 'accounts:profile' %}" class="btn-primary">Go to dashboard</a>
-      {% else %}
-        <a href="{% url 'accounts:register' %}" class="btn-primary">Create account</a>
-        <a href="{% url 'accounts:login' %}" class="btn glass border border-white/20">Sign in</a>
-      {% endif %}
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 space-y-20 pb-24">
+  <div class="matrix-bento relative">
+    <div class="matrix-bento__primary matrix-glass matrix-glow">
+      <p class="matrix-label mb-7 inline-flex">Jakarta fitness intelligence</p>
+      <h1 class="text-4xl sm:text-[3.2rem] leading-tight font-semibold tracking-tight max-w-2xl">
+        Architect your training inside the FitMatrix.
+      </h1>
+      <p class="mt-6 text-base sm:text-lg text-forest-muted max-w-2xl">
+        Blend high-energy gyms, boutique studios, aquatic rigs, and wellness sanctuaries.
+        FitMatrix composes the right facility map for your goals, budget, and vibe.
+      </p>
+      <div class="matrix-stat mt-8">
+        <div class="matrix-stat__value">{{ summary.place_count|default:0 }}</div>
+        <div class="matrix-stat__label">Spaces indexed</div>
+      </div>
+      <div class="matrix-stat__label mt-6 uppercase tracking-[0.18em] text-xs text-forest-soft">Switch tracks</div>
+      <div class="mt-3 flex flex-col sm:flex-row gap-4">
+        <a href="{% url 'search:results' %}" class="matrix-btn">Search</a>
+        {% if request.user.is_authenticated %}
+          <a href="{% url 'accounts:profile' %}" class="matrix-btn" data-variant="ghost">View profile</a>
+        {% else %}
+          <a href="{% url 'accounts:register' %}" class="matrix-btn" data-variant="ghost">Create account</a>
+        {% endif %}
+      </div>
+      <div class="matrix-stats">
+        <div class="matrix-stat">
+          <span class="matrix-stat__value">{{ summary.studio_count|default:0 }}</span>
+          <span class="matrix-stat__label">Boutique studios</span>
+        </div>
+        <div class="matrix-stat">
+          <span class="matrix-stat__value">{{ summary.trainer_count|default:0 }}</span>
+          <span class="matrix-stat__label">Performance coaches</span>
+        </div>
+        <div class="matrix-stat">
+          <span class="matrix-stat__value">360</span>
+          <span class="matrix-stat__label">Holistic view</span>
+        </div>
+      </div>
+    </div>
+    <div class="matrix-bento__secondary">
+      <div class="matrix-vision matrix-glass matrix-glow">
+        <div class="matrix-vision__grid" aria-hidden="true">
+          <div class="matrix-vision__node" style="--delay:0.1s"></div>
+          <div class="matrix-vision__node" style="--delay:0.25s"></div>
+          <div class="matrix-vision__node" style="--delay:0.4s"></div>
+          <div class="matrix-vision__node" style="--delay:0.55s"></div>
+          <div class="matrix-vision__node" style="--delay:0.7s"></div>
+        </div>
+        <header class="space-y-3">
+          <div class="matrix-chip">System vision</div>
+          <h2 class="matrix-vision__title">The matrix aligns today’s energy with tomorrow’s recovery.</h2>
+          <p class="matrix-vision__body">
+            See how the network routes you through strength, conditioning, and regeneration without breaking the flow.
+          </p>
+        </header>
+        <dl class="matrix-vision__scan">
+          <div>
+            <dt>Link quality</dt>
+            <dd data-vision-value="92%">92%</dd>
+          </div>
+          <div>
+            <dt>Recovery sync</dt>
+            <dd data-vision-value="86%">86%</dd>
+          </div>
+          <div>
+            <dt>Focus score</dt>
+            <dd data-vision-value="74%">74%</dd>
+          </div>
+        </dl>
+        <footer class="matrix-vision__footer">
+          <div>
+            <p class="matrix-vision__label">Next wave</p>
+            <p class="matrix-vision__value">Altitude Ride · 17:30</p>
+          </div>
+          <button class="matrix-btn" data-variant="ghost">Preview circuit</button>
+        </footer>
+      </div>
     </div>
   </div>
+
+  <section class="matrix-energy-zone">
+    <div class="matrix-energy-zone__inner space-y-12">
+      <div class="space-y-7">
+        <h2 class="matrix-section-title">Filter the matrix by energy</h2>
+        <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+          {% for filter in facility_filters %}
+            <a href="{% url 'search:results' %}?type={{ filter.key|lower }}" class="matrix-filter matrix-glow">
+              <span class="matrix-filter__title">{{ filter.label }}</span>
+              <span class="matrix-filter__label text-forest-muted text-sm">{{ filter.description }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="matrix-divider"></div>
+      <div class="space-y-10">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <h2 class="matrix-section-title">Trending coordinates</h2>
+          <a href="{% url 'search:results' %}" class="matrix-btn" data-variant="ghost">Explore all</a>
+        </div>
+        <div class="matrix-grid" data-search-results>
+          {% include "places/_cards.html" with places=hero_places %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="space-y-8">
+    <h2 class="matrix-section-title">Spotlight pairings</h2>
+    <div class="matrix-grid">
+      {% for place in spotlight_places %}
+        <article class="matrix-card">
+          {% with image=place.hero_image|default:'media/studio-flow.jpg' %}
+            <div class="matrix-card__media">
+              {% if image and '://' in image %}
+                <img src="{{ image }}" alt="{{ place.name }}" loading="lazy" />
+              {% else %}
+                <img src="{% static image %}" alt="{{ place.name }}" loading="lazy" />
+              {% endif %}
+              <span class="matrix-card__badge">Highlight</span>
+            </div>
+          {% endwith %}
+          <div class="matrix-card__body">
+            <div class="matrix-card__meta">
+              <span>{{ place.city }}</span>
+              <span>{{ place.price_display }}</span>
+              <span>Rating {{ place.rating_avg|floatformat:1 }}</span>
+            </div>
+            <h3 class="matrix-card__title">{{ place.name }}</h3>
+            <p class="text-forest-muted text-sm">{{ place.tagline|default:place.summary|truncatewords:18 }}</p>
+            <div class="matrix-card__amenities">
+              {% for amenity in place.amenities_list|slice:":4" %}
+                <span>{{ amenity }}</span>
+              {% empty %}
+                <span>Premium equipment</span>
+              {% endfor %}
+            </div>
+            <a class="matrix-btn mt-4 w-fit" data-variant="ghost" href="{{ place.get_absolute_url }}">See detail</a>
+          </div>
+        </article>
+      {% empty %}
+        <div class="matrix-empty-state">
+          <h3>No spotlight yet</h3>
+          <p>Add new venues in the admin console to populate the spotlight section.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="space-y-8">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <h2 class="matrix-section-title">New in the matrix</h2>
+      <a href="{% url 'search:results' %}?sort=newest" class="matrix-btn" data-variant="ghost">View recent drops</a>
+    </div>
+    <div class="matrix-grid">
+      {% for place in newest_places %}
+        <article class="matrix-card">
+          {% with image=place.hero_image|default:'media/outdoor-matrix.jpg' %}
+            <div class="matrix-card__media">
+              {% if image and '://' in image %}
+                <img src="{{ image }}" alt="{{ place.name }}" loading="lazy" />
+              {% else %}
+                <img src="{% static image %}" alt="{{ place.name }}" loading="lazy" />
+              {% endif %}
+              <span class="matrix-card__badge">{{ place.facility_type }}</span>
+            </div>
+          {% endwith %}
+          <div class="matrix-card__body">
+            <div class="matrix-card__meta">
+              <span>{{ place.city }}</span>
+              <span>{{ place.price_display }}</span>
+            </div>
+            <h3 class="matrix-card__title">{{ place.name }}</h3>
+            <p class="text-forest-muted text-sm">{{ place.summary|default:"Premium multi-zone facility."|truncatewords:18 }}</p>
+            <div class="matrix-card__amenities">
+              {% for amenity in place.amenities_list|slice:":3" %}
+                <span>{{ amenity }}</span>
+              {% empty %}
+                <span>Immersive sound</span>
+                <span>Mobility lab</span>
+              {% endfor %}
+            </div>
+            <a class="matrix-btn mt-4 w-fit" data-variant="ghost" href="{{ place.get_absolute_url }}">Inspect space</a>
+          </div>
+        </article>
+      {% empty %}
+        <div class="matrix-empty-state">
+          <h3>No venues yet</h3>
+          <p>Once you populate the FitMatrix database, the newest facilities will surface here automatically.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
 </section>
 {% endblock %}

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import imghdr
 from io import BytesIO
 from typing import Any
+
+import re
 
 from django import forms
 from django.contrib.auth import authenticate, get_user_model
@@ -17,10 +18,29 @@ except ModuleNotFoundError:  # pragma: no cover - fallback when Pillow missing
     Image = None  # type: ignore[assignment]
     ImageOps = None  # type: ignore[assignment]
 
+from places.models import Place
+
 from .models import User
 
 AVATAR_MAX_SIZE_MB = 2
 AVATAR_LIMIT_BYTES = AVATAR_MAX_SIZE_MB * 1024 * 1024
+_IMAGE_SIGNATURES = (
+    (b"\x89PNG\r\n\x1a\n", "png"),
+    (b"\xff\xd8\xff\xe0", "jpeg"),  # JPEG JFIF
+    (b"\xff\xd8\xff\xe1", "jpeg"),  # JPEG EXIF
+    (b"\xff\xd8\xff\xdb", "jpeg"),  # JPEG quantization tables
+)
+
+
+def _basic_image_type(file_obj: Any) -> str | None:
+    header = file_obj.read(16)
+    file_obj.seek(0)
+    for signature, name in _IMAGE_SIGNATURES:
+        if header.startswith(signature):
+            return name
+    if header.startswith(b"\xff\xd8"):
+        return "jpeg"
+    return None
 
 
 class AvatarProcessingMixin:
@@ -43,8 +63,7 @@ class AvatarProcessingMixin:
             finally:
                 avatar.seek(0)
         else:
-            kind = imghdr.what(None, h=avatar.read())
-            avatar.seek(0)
+            kind = _basic_image_type(avatar)
             if kind not in {"png", "jpeg"}:
                 raise ValidationError(_("Upload a valid image (PNG/JPG)."))
         return avatar
@@ -100,6 +119,48 @@ class RegisterForm(AvatarProcessingMixin, UserCreationForm):
             user.save()
         else:
             self._process_avatar(user)
+        return user
+
+
+class AdminUserCreationForm(UserCreationForm):
+    email = forms.EmailField()
+    display_name = forms.CharField(max_length=100, required=False)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ("username", "email", "display_name", "password1", "password2")
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        field_settings = {
+            "username": {"autocomplete": "username"},
+            "email": {"autocomplete": "email"},
+            "display_name": {"autocomplete": "name"},
+            "password1": {"autocomplete": "new-password"},
+            "password2": {"autocomplete": "new-password"},
+        }
+        for name, attrs in field_settings.items():
+            field = self.fields.get(name)
+            if field is None:
+                continue
+            field.widget.attrs.setdefault("class", "input")
+            for key, value in attrs.items():
+                field.widget.attrs.setdefault(key, value)
+
+    def clean_email(self) -> str:
+        email = self.cleaned_data.get("email", "").strip()
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(_("Email address must be unique."))
+        return email
+
+    def save(self, commit: bool = True) -> User:
+        user: User = super().save(commit=False)
+        user.email = self.cleaned_data["email"].lower()
+        user.display_name = self.cleaned_data.get("display_name") or ""
+        user.role = User.Roles.ADMIN
+        user.is_staff = True
+        if commit:
+            user.save()
         return user
 
 
@@ -196,3 +257,74 @@ class AccessiblePasswordChangeForm(PasswordChangeForm):
     def full_clean(self) -> None:
         super().full_clean()
         self._update_aria()
+
+
+class AdminPlaceForm(forms.ModelForm):
+    amenities = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"class": "input", "rows": 3}),
+        help_text="Comma or newline separated list of amenities.",
+    )
+    gallery = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"class": "input", "rows": 3}),
+        help_text="Comma or newline separated list of gallery image URLs.",
+    )
+
+    class Meta:
+        model = Place
+        fields = (
+            "name",
+            "tagline",
+            "summary",
+            "tags",
+            "address",
+            "city",
+            "facility_type",
+            "amenities",
+            "highlight_score",
+            "accent_color",
+            "hero_image",
+            "gallery",
+            "is_free",
+            "price",
+            "is_active",
+        )
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "input"}),
+            "tagline": forms.TextInput(attrs={"class": "input"}),
+            "summary": forms.Textarea(attrs={"class": "input", "rows": 4}),
+            "tags": forms.TextInput(attrs={"class": "input"}),
+            "address": forms.TextInput(attrs={"class": "input"}),
+            "city": forms.TextInput(attrs={"class": "input"}),
+            "facility_type": forms.Select(attrs={"class": "input"}),
+            "highlight_score": forms.NumberInput(attrs={"class": "input"}),
+            "accent_color": forms.TextInput(attrs={"class": "input", "placeholder": "#03B863"}),
+            "hero_image": forms.TextInput(attrs={"class": "input"}),
+            "is_free": forms.CheckboxInput(attrs={"class": "input-toggle"}),
+            "price": forms.NumberInput(attrs={"class": "input", "step": "0.01", "min": "0"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "input-toggle"}),
+        }
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.initial.setdefault("amenities", self._join_list(self.instance.amenities_list()))
+            self.initial.setdefault("gallery", self._join_list(self.instance.gallery_list()))
+
+    def _join_list(self, values: list[str]) -> str:
+        return "\n".join(values)
+
+    def _split_value(self, value: str) -> list[str]:
+        if not value:
+            return []
+        parts = re.split(r"[\n,]+", value)
+        return [item.strip() for item in parts if item.strip()]
+
+    def clean_amenities(self) -> list[str]:
+        amenities = self.cleaned_data.get("amenities", "")
+        return self._split_value(amenities)
+
+    def clean_gallery(self) -> list[str]:
+        gallery = self.cleaned_data.get("gallery", "")
+        return self._split_value(gallery)

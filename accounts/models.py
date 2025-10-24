@@ -70,7 +70,7 @@ class ActivityLog(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
-        return f"{self.user} • {self.get_type_display()}"
+        return f"{self.user} -> {self.get_type_display()}"
 
 
 class WishlistItem(models.Model):
@@ -117,4 +117,31 @@ class WishlistItem(models.Model):
 
     def __str__(self) -> str:
         target = self.place or self.trainer
-        return f"Wishlist({self.user} → {target})"
+        return f"Wishlist({self.user} -> {target})"
+
+
+class WishlistCollection(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="wishlist_collections")
+    name = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "name")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.user})"
+
+
+class CollectionItem(models.Model):
+    collection = models.ForeignKey(WishlistCollection, on_delete=models.CASCADE, related_name="items")
+    place = models.ForeignKey("places.Place", on_delete=models.CASCADE, related_name="collection_items")
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("collection", "place")
+        ordering = ["-added_at"]
+
+    def __str__(self) -> str:
+        return f"{self.collection} -> {self.place}"

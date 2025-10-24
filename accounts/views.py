@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import time
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -13,13 +14,20 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
-from places.models import Place
 from reviews.models import Review
-from scheduling.forms import SessionSlotForm
+from scheduling.forms import SessionSlotForm, TrainerForm
 from scheduling.models import Booking, SessionSlot, Trainer
+from places.models import Place
 
-from .forms import AccessiblePasswordChangeForm, LoginForm, ProfileForm, RegisterForm
-from .models import ActivityLog, User, WishlistItem
+from .forms import (
+    AccessiblePasswordChangeForm,
+    AdminPlaceForm,
+    AdminUserCreationForm,
+    LoginForm,
+    ProfileForm,
+    RegisterForm,
+)
+from .models import ActivityLog, CollectionItem, User, WishlistCollection, WishlistItem
 
 THROTTLE_LIMIT = 5
 THROTTLE_TIMEOUT = 600  # seconds
@@ -81,6 +89,160 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     logout(request)
     messages.info(request, "You have been logged out.")
     return redirect("accounts:login")
+
+
+def _require_ajax(request: HttpRequest) -> JsonResponse | None:
+    if request.headers.get("x-requested-with") != "XMLHttpRequest":
+        return JsonResponse({"error": "Invalid request."}, status=400)
+    return None
+
+
+def _load_json(request: HttpRequest) -> tuple[dict[str, object], JsonResponse | None]:
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return {}, JsonResponse({"error": "Invalid payload."}, status=400)
+    return payload, None
+
+
+@login_required
+@require_GET
+def get_user_collections(request: HttpRequest) -> JsonResponse:
+    collections = (
+        WishlistCollection.objects.filter(user=request.user)
+        .order_by("name")
+        .values("id", "name")
+    )
+    return JsonResponse({"collections": list(collections)})
+
+
+@login_required
+@require_POST
+def create_collection_view(request: HttpRequest) -> JsonResponse:
+    if (response := _require_ajax(request)) is not None:
+        return response
+    payload, error = _load_json(request)
+    if error:
+        return error
+
+    name = str(payload.get("name", "")).strip()
+    description = str(payload.get("description", "")).strip()
+    place_id = payload.get("place_id")
+
+    if not name:
+        return JsonResponse({"error": "Collection name is required."}, status=400)
+    if not place_id:
+        return JsonResponse({"error": "Place is required."}, status=400)
+
+    place = get_object_or_404(Place, pk=place_id)
+    collection, created = WishlistCollection.objects.get_or_create(
+        user=request.user,
+        name=name,
+        defaults={"description": description},
+    )
+
+    if not created and description and collection.description != description:
+        collection.description = description
+        collection.save(update_fields=["description"])
+
+    if CollectionItem.objects.filter(collection=collection, place=place).exists():
+        return JsonResponse(
+            {
+                "status": "exists",
+                "collection": {"id": collection.pk, "name": collection.name},
+            }
+        )
+
+    CollectionItem.objects.create(collection=collection, place=place)
+    WishlistItem.objects.get_or_create(user=request.user, place=place)
+    ActivityLog.objects.create(
+        user=request.user,
+        type=ActivityLog.Types.WISHLIST_ADDED,
+        meta={"collection": collection.pk, "place": place.pk},
+    )
+    return JsonResponse(
+        {
+            "status": "added",
+            "collection": {"id": collection.pk, "name": collection.name},
+        }
+    )
+
+
+@login_required
+@require_POST
+def add_to_collection_view(request: HttpRequest) -> JsonResponse:
+    if (response := _require_ajax(request)) is not None:
+        return response
+    payload, error = _load_json(request)
+    if error:
+        return error
+
+    collection_id = payload.get("collection_id")
+    place_id = payload.get("place_id")
+
+    if not collection_id or not place_id:
+        return JsonResponse(
+            {"error": "Both collection_id and place_id are required."}, status=400
+        )
+
+    collection = get_object_or_404(
+        WishlistCollection, pk=collection_id, user=request.user
+    )
+    place = get_object_or_404(Place, pk=place_id)
+
+    if CollectionItem.objects.filter(collection=collection, place=place).exists():
+        return JsonResponse(
+            {
+                "status": "exists",
+                "collection": {"id": collection.pk, "name": collection.name},
+            }
+        )
+
+    CollectionItem.objects.create(collection=collection, place=place)
+    WishlistItem.objects.get_or_create(user=request.user, place=place)
+    ActivityLog.objects.create(
+        user=request.user,
+        type=ActivityLog.Types.WISHLIST_ADDED,
+        meta={"collection": collection.pk, "place": place.pk},
+    )
+    return JsonResponse(
+        {
+            "status": "added",
+            "collection": {"id": collection.pk, "name": collection.name},
+        }
+    )
+
+
+@login_required
+@require_POST
+def delete_collection_view(request: HttpRequest, pk: int) -> JsonResponse:
+    if (response := _require_ajax(request)) is not None:
+        return response
+    collection = get_object_or_404(WishlistCollection, pk=pk, user=request.user)
+    collection.delete()
+    ActivityLog.objects.create(
+        user=request.user,
+        type=ActivityLog.Types.WISHLIST_REMOVED,
+        meta={"collection": pk},
+    )
+    return JsonResponse({"status": "deleted"})
+
+
+@login_required
+@require_POST
+def delete_collection_item_view(request: HttpRequest, pk: int) -> JsonResponse:
+    if (response := _require_ajax(request)) is not None:
+        return response
+    item = get_object_or_404(CollectionItem, pk=pk, collection__user=request.user)
+    place_id = item.place_id
+    collection_id = item.collection_id
+    item.delete()
+    ActivityLog.objects.create(
+        user=request.user,
+        type=ActivityLog.Types.WISHLIST_REMOVED,
+        meta={"collection": collection_id, "place": place_id},
+    )
+    return JsonResponse({"status": "deleted"})
 
 
 @login_required
@@ -157,59 +319,12 @@ def activity_history_view(request: HttpRequest) -> HttpResponse:
     return render(request, "accounts/activity_history.html", {"page_obj": page_obj})
 
 
-@login_required
-@require_GET
-def wishlist_view(request: HttpRequest) -> HttpResponse:
-    items = (
-        WishlistItem.objects.filter(user=request.user)
-        .select_related("place", "trainer")
-        .order_by("-created_at")
-    )
-    page_obj = Paginator(items, 12).get_page(request.GET.get("page"))
-    return render(request, "accounts/wishlist.html", {"page_obj": page_obj})
-
-
-@login_required
-@require_POST
-def wishlist_toggle_view(request: HttpRequest, kind: str, pk: int) -> HttpResponse:
-    if kind not in {"place", "trainer"}:
-        return JsonResponse({"error": "Invalid kind"}, status=400)
-    model = Place if kind == "place" else Trainer
-    target = get_object_or_404(model, pk=pk)
-    filters: dict[str, object] = {"user": request.user}
-    if kind == "place":
-        filters["place"] = target
-    else:
-        filters["trainer"] = target
-    item = WishlistItem.objects.filter(**filters).first()
-    if item:
-        item.delete()
-        ActivityLog.objects.create(
-            user=request.user,
-            type=ActivityLog.Types.WISHLIST_REMOVED,
-            meta={"kind": kind, "id": pk},
-        )
-        state = "removed"
-    else:
-        item = WishlistItem(user=request.user)
-        if kind == "place":
-            item.place = target
-        else:
-            item.trainer = target
-        item.save()
-        ActivityLog.objects.create(
-            user=request.user,
-            type=ActivityLog.Types.WISHLIST_ADDED,
-            meta={"kind": kind, "id": pk},
-        )
-        state = "added"
-    return JsonResponse({"status": state})
-
-
 @user_passes_test(is_admin)
 def admin_console_view(request: HttpRequest) -> HttpResponse:
     total_users = User.objects.count()
     total_bookings = Booking.objects.count()
+    total_places = Place.objects.count()
+    total_trainers = Trainer.objects.count()
     upcoming_slots = SessionSlot.objects.filter(start__gte=timezone.now()).count()
     return render(
         request,
@@ -217,9 +332,130 @@ def admin_console_view(request: HttpRequest) -> HttpResponse:
         {
             "total_users": total_users,
             "total_bookings": total_bookings,
+            "total_places": total_places,
+            "total_trainers": total_trainers,
             "upcoming_slots": upcoming_slots,
         },
     )
+
+
+@user_passes_test(is_admin)
+def admin_users_list(request: HttpRequest) -> HttpResponse:
+    admins = User.objects.filter(role=User.Roles.ADMIN).order_by("username")
+    form = AdminUserCreationForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        new_admin = form.save()
+        messages.success(
+            request,
+            f"Admin account '{new_admin.username}' created successfully.",
+        )
+        return redirect("accounts:admin-users")
+    return render(
+        request,
+        "accounts/admin/admins_list.html",
+        {"admins": admins, "form": form},
+    )
+
+
+@user_passes_test(is_admin)
+def admin_places_list(request: HttpRequest) -> HttpResponse:
+    places = Place.objects.order_by("name")
+    return render(request, "accounts/admin/places_list.html", {"places": places})
+
+
+@user_passes_test(is_admin)
+def admin_place_create(request: HttpRequest) -> HttpResponse:
+    form = AdminPlaceForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Place created successfully.")
+        return redirect("accounts:admin-places")
+    return render(request, "accounts/admin/place_form.html", {"form": form})
+
+
+@user_passes_test(is_admin)
+def admin_place_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    place = get_object_or_404(Place, pk=pk)
+    form = AdminPlaceForm(request.POST or None, instance=place)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Place updated successfully.")
+        return redirect("accounts:admin-places")
+    return render(
+        request,
+        "accounts/admin/place_form.html",
+        {"form": form, "place": place},
+    )
+
+
+@user_passes_test(is_admin)
+@require_POST
+def admin_place_delete(request: HttpRequest, pk: int) -> HttpResponse:
+    place = get_object_or_404(Place, pk=pk)
+    place.delete()
+    messages.info(request, "Place deleted.")
+    return redirect("accounts:admin-places")
+
+
+@user_passes_test(is_admin)
+@require_POST
+def admin_place_toggle(request: HttpRequest, pk: int) -> HttpResponse:
+    place = get_object_or_404(Place, pk=pk)
+    place.is_active = not place.is_active
+    place.save(update_fields=["is_active"])
+    if place.is_active:
+        messages.success(request, "Place published.")
+    else:
+        messages.info(request, "Place hidden from listings.")
+    return redirect("accounts:admin-places")
+
+
+@user_passes_test(is_admin)
+def admin_trainers_list(request: HttpRequest) -> HttpResponse:
+    trainers = Trainer.objects.order_by("name")
+    return render(
+        request,
+        "accounts/admin/trainers_list.html",
+        {"trainers": trainers},
+    )
+
+
+@user_passes_test(is_admin)
+def admin_trainer_create(request: HttpRequest) -> HttpResponse:
+    form = TrainerForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Trainer created successfully.")
+        return redirect("accounts:admin-trainers")
+    return render(request, "accounts/admin/trainer_form.html", {"form": form})
+
+
+@user_passes_test(is_admin)
+def admin_trainer_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    trainer = get_object_or_404(Trainer, pk=pk)
+    form = TrainerForm(request.POST or None, instance=trainer)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Trainer updated successfully.")
+        return redirect("accounts:admin-trainers")
+    return render(
+        request,
+        "accounts/admin/trainer_form.html",
+        {"form": form, "trainer": trainer},
+    )
+
+
+@user_passes_test(is_admin)
+@require_POST
+def admin_trainer_toggle(request: HttpRequest, pk: int) -> HttpResponse:
+    trainer = get_object_or_404(Trainer, pk=pk)
+    trainer.is_active = not trainer.is_active
+    trainer.save(update_fields=["is_active"])
+    if trainer.is_active:
+        messages.success(request, "Trainer activated.")
+    else:
+        messages.info(request, "Trainer hidden from public listings.")
+    return redirect("accounts:admin-trainers")
 
 
 @user_passes_test(is_admin)

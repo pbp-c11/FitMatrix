@@ -5,7 +5,7 @@ from .models import Booking, SessionSlot, Trainer
 
 @admin.register(Trainer)
 class TrainerAdmin(admin.ModelAdmin):
-    list_display = ("name", "specialties", "rating_avg", "is_active")
+    list_display = ("name", "specialties", "price_per_session", "likes", "rating_avg", "is_active")
     search_fields = ("name", "specialties")
     list_filter = ("is_active",)
 
