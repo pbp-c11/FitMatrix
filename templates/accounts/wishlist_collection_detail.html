@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ collection.name }} · Wishlist · FitMatrix{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 pb-20 space-y-10">
+  <header class="matrix-glass matrix-glow px-6 sm:px-8 py-10 rounded-[30px] space-y-4">
+    <p class="matrix-label">Wishlist collection</p>
+    <h1 class="text-3xl font-semibold">{{ collection.name }}</h1>
+    {% if collection.description %}
+      <p class="text-forest-muted">{{ collection.description }}</p>
+    {% endif %}
+    <a href="{% url 'wishlist:list' %}" class="matrix-link">Back to wishlist</a>
+  </header>
+
+  <div class="space-y-4">
+    {% for item in items %}
+      <article class="matrix-card" data-variant="glass">
+        <div class="matrix-card__body space-y-3">
+          <p class="matrix-meta-label">{{ item.place.city }}</p>
+          <h2 class="matrix-card__title">{{ item.place.name }}</h2>
+          <p class="text-sm text-forest-muted">{{ item.place.summary|truncatewords:24 }}</p>
+          <div class="flex items-center justify-between gap-4">
+            <a href="{{ item.place.get_absolute_url }}" class="matrix-btn" data-variant="ghost">View place</a>
+            <form method="post" action="{% url 'accounts:delete-collection-item' item.pk %}" data-collection-item-form>
+              {% csrf_token %}
+              <button type="submit" class="matrix-btn" data-variant="ghost">Remove</button>
+            </form>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <p class="text-white/70">No places saved yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script>
+  document.querySelectorAll('[data-collection-item-form]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form)
+      }).then(() => window.location.reload());
+    });
+  });
+</script>
+{% endblock %}
