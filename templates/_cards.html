@@ -1,12 +1,12 @@
 {% comment %}
-Reusable card grid untuk Place objects.
-Digunakan di home, search, nearby, dsb:
-  {% include "places/_cards.html" with places=<queryset> %}
+Reusable card grid for Place objects.
+Usage example:
+  {% include "_cards.html" with places=<queryset> %}
 {% endcomment %}
 
+{% load static %}
 {% for place in places %}
   <article class="rounded-[35px] border border-black/10 shadow-sm overflow-hidden bg-gradient-to-tr from-[#FDFEFD] to-[#F0FDF4]">
-    <!-- Gambar utama -->
     <a href="{% url 'places:detail' place.slug %}" class="block relative">
       {% with img=place.main_image|default:place.hero_image %}
         {% if img %}
@@ -24,13 +24,12 @@ Digunakan di home, search, nearby, dsb:
       </span>
     </a>
 
-    <!-- Detail -->
     <div class="p-6 space-y-3">
       <div class="flex items-center flex-wrap gap-x-4 gap-y-1 text-[#0D5821]/70 text-[13.5px]">
         <span>{{ place.city|default:"" }}</span>
-        <span class="hidden sm:inline">•</span>
+        <span class="hidden sm:inline">&#8226;</span>
         <span>{{ place.price_display|default:"Pricing on request" }}</span>
-        <span class="hidden sm:inline">•</span>
+        <span class="hidden sm:inline">&#8226;</span>
         <span>Rating {{ place.rating_avg|default_if_none:"0.0"|floatformat:1 }}</span>
       </div>
 
@@ -45,7 +44,7 @@ Digunakan di home, search, nearby, dsb:
       </p>
 
       <div class="pt-2">
-        <a href="{% url 'places:detail' place.slug %}" class="matrix-btn" data-variant="ghost">VIEW SPACE</a>
+        <a href="{% url 'places:detail' place.slug %}" class="matrix-btn" data-variant="ghost">View Space</a>
       </div>
     </div>
   </article>

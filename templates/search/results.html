@@ -43,20 +43,6 @@
   </form>
 
   <section class="space-y-6">
-    <div class="matrix-pill-group">
-      {% for filter in facility_filters %}
-        <button
-          type="button"
-          class="matrix-pill"
-          data-filter-trigger
-          data-filter-target="type"
-          data-filter-value="{{ filter.key|lower }}"
-          data-selected="{% if selected_type == filter.key %}true{% else %}false{% endif %}"
-        >
-          {{ filter.label }}
-        </button>
-      {% endfor %}
-    </div>
 
     <div class="flex flex-wrap items-center gap-4">
       <p class="matrix-meta-label">Results</p>

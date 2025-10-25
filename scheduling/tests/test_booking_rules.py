@@ -5,10 +5,12 @@ from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import ActivityLog
 from places.models import Place
+from scheduling.forms import BookingRequestForm
 from scheduling.models import Booking, SessionSlot, Trainer
 
 User = get_user_model()
@@ -77,6 +79,29 @@ class BookingRulesTests(TestCase):
         booking.cancel(by_admin=True)
         self.assertEqual(logs.count(), 1)
 
+    def test_can_rebook_cancelled_slot(self) -> None:
+        booking = Booking.objects.create(user=self.user, slot=self.slot)
+        booking.cancel()
+        form = BookingRequestForm(self.user, data={"slot": self.slot.pk})
+        self.assertTrue(form.is_valid())
+
+    def test_booking_create_reactivates_cancelled_booking(self) -> None:
+        booking = Booking.objects.create(user=self.user, slot=self.slot)
+        booking.cancel()
+        self.client.login(username="user1", password="Testpass123!")
+        response = self.client.post(
+            reverse("scheduling:booking-create", args=[self.slot.pk]),
+            {"slot": self.slot.pk},
+            follow=True,
+        )
+        self.assertRedirects(response, reverse("scheduling:booking-manage"))
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, Booking.Status.BOOKED)
+        self.assertEqual(
+            Booking.objects.filter(user=self.user, slot=self.slot).count(),
+            1,
+        )
+
     def test_session_slot_validation_rules(self) -> None:
         with self.assertRaises(ValidationError):
             SessionSlot(
@@ -102,3 +127,13 @@ class BookingRulesTests(TestCase):
             type=ActivityLog.Types.BOOKING_CREATED,
         )
         self.assertEqual(log.meta["booking_id"], booking.pk)
+
+    def test_sessions_view_marks_cancelled_slot_as_available(self) -> None:
+        booking = Booking.objects.create(user=self.user, slot=self.slot)
+        booking.cancel()
+
+        self.client.login(username="user1", password="Testpass123!")
+        response = self.client.get(reverse("scheduling:sessions"))
+
+        self.assertNotIn(self.slot.pk, response.context["booked_slot_ids"])
+        self.assertContains(response, "Book slot")

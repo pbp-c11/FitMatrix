@@ -25,42 +25,45 @@
   box-sizing: border-box;
 }
 
-body {
+.matrix-body {
   min-height: 100vh;
-  font-family: "Space Grotesk", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at 3% 8%, rgba(217, 255, 199, 0.92) 0, rgba(217, 255, 199, 0.0) 32%),
-    radial-gradient(circle at 75% -10%, rgba(255, 255, 190, 0.85) 0, rgba(255, 255, 190, 0) 38%),
-    linear-gradient(145deg, var(--matrix-bg-light) 0%, var(--matrix-bg-mid) 35%, #d5ffe3 65%, rgba(208, 255, 219, 0.94) 100%);
+  font-family: "Sora", "Space Grotesk", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #EEFDF2;
   color: var(--matrix-text);
   position: relative;
   overflow-x: hidden;
 }
 
-body::before,
-body::after {
-  content: "";
+.matrix-global-bg,
+.matrix-global-bg::after {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  mix-blend-mode: screen;
+  z-index: 0;
 }
 
-body::before {
-  background-image: linear-gradient(var(--matrix-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--matrix-grid) 1px, transparent 1px);
-  background-size: 72px 72px;
-  opacity: 0.35;
-  mask: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 95%);
-}
-
-body::after {
+.matrix-global-bg {
   background:
-    radial-gradient(circle at 18% 24%, rgba(3, 184, 99, 0.18), transparent 48%),
-    radial-gradient(circle at 90% 30%, rgba(230, 255, 5, 0.18), transparent 55%),
-    radial-gradient(circle at 60% 80%, rgba(10, 174, 90, 0.18), transparent 50%);
-  opacity: 0.9;
-  filter: blur(28px);
+    radial-gradient(1200px 800px at 20% 18%, #D9FEDC 0%, rgba(217, 254, 220, 0) 60%),
+    radial-gradient(1400px 900px at 80% 72%, #FFF7C7 0%, rgba(255, 247, 199, 0) 62%),
+    linear-gradient(180deg, #EAFBEE 0%, #F3FFF7 100%);
+  background-color: #EEFDF2;
+}
+
+.matrix-global-bg::after {
+  content: "";
+  opacity: 0.08;
+  mix-blend-mode: soft-light;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 0.018'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+.matrix-card-bg {
+  background:
+    linear-gradient(21deg, #FDFEFD 0%, #F6FEF8 42%, #F0FDF4 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 .02'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-blend-mode: normal, soft-light;
 }
 
 a {
@@ -84,6 +87,36 @@ a {
   border-radius: var(--matrix-radius-lg);
   backdrop-filter: blur(22px);
   box-shadow: 0 20px 40px rgba(15, 88, 54, 0.16);
+}
+
+.nav-underline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-bottom: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.nav-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0;
+}
+
+.nav-underline:hover::after,
+.nav-underline[aria-current="page"]::after {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 .glass {
@@ -283,6 +316,25 @@ a {
   background: rgba(255, 255, 255, 0.9);
 }
 
+.matrix-btn[data-variant="danger"] {
+  background: linear-gradient(135deg, #ff7a88 0%, #ff3d5a 48%, #ff8b4d 100%);
+  color: #fff;
+  border: 1px solid rgba(217, 45, 75, 0.4);
+  box-shadow: 0 18px 32px rgba(217, 45, 75, 0.35);
+}
+
+.matrix-btn[data-variant="danger"]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 46px rgba(217, 45, 75, 0.4);
+  background: linear-gradient(135deg, #ff909d 0%, #ff304f 50%, #ff9c5d 100%);
+}
+
+.matrix-btn[data-variant="danger"] svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-right: 0.45rem;
+}
+
 .matrix-chip {
   display: inline-flex;
   align-items: center;
@@ -447,6 +499,21 @@ a {
   border-color: rgba(3, 184, 99, 0.32);
   box-shadow: 0 28px 48px rgba(24, 110, 70, 0.24);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(220, 255, 230, 1) 100%);
+}
+
+.matrix-card[data-variant="hero"] {
+  border-radius: 60px;
+  padding: clamp(2.5rem, 5vw, 3.5rem);
+  background:
+    linear-gradient(21deg, #FDFEFD 0%, #F6FEF8 42%, #F0FDF4 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 .02'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-blend-mode: normal, soft-light;
+  border: 1px solid rgba(10, 65, 45, 0.12);
+  box-shadow: 0 26px 52px rgba(9, 65, 45, 0.18);
+}
+
+.matrix-card[data-variant="hero"]:hover {
+  box-shadow: 0 34px 60px rgba(9, 65, 45, 0.22);
 }
 
 .matrix-card__media {

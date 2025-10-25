@@ -17,50 +17,6 @@ class FacilityFilter:
     accent: str
 
 
-FACILITY_FILTERS: tuple[FacilityFilter, ...] = (
-    FacilityFilter(
-        key="ALL",
-        label="All Spaces",
-        description="A matrix of versatile gyms, studios, courts, and wellness hubs.",
-        accent="#7FEB45",
-    ),
-    FacilityFilter(
-        key=Place.FacilityType.GYM,
-        label="High-Energy Gyms",
-        description="Strength, conditioning, and performance-first spaces.",
-        accent="#03B863",
-    ),
-    FacilityFilter(
-        key=Place.FacilityType.STUDIO,
-        label="Boutique Studios",
-        description="Curated classes for pilates, barre, HIIT, and mindfulness.",
-        accent="#0AAE5A",
-    ),
-    FacilityFilter(
-        key=Place.FacilityType.SWIM,
-        label="Aquatic Training",
-        description="Olympic-standard pools and recovery hydrotherapies.",
-        accent="#16C79A",
-    ),
-    FacilityFilter(
-        key=Place.FacilityType.OUTDOOR,
-        label="Outdoor Arenas",
-        description="Adventure-ready tracks, climb walls, and functional rigs.",
-        accent="#03A688",
-    ),
-    FacilityFilter(
-        key=Place.FacilityType.WELLNESS,
-        label="Wellness Sanctuaries",
-        description="Spa-grade recovery, cold plunges, and breathwork labs.",
-        accent="#08BDBA",
-    ),
-    FacilityFilter(
-        key=Place.FacilityType.COURT,
-        label="Court Sports",
-        description="Premium courts for badminton, futsal, boxing, and more.",
-        accent="#0B8643",
-    ),
-)
 
 PRICE_FILTERS = {
     "free": {"label": "Free Access", "predicate": lambda qs: qs.filter(is_free=True)},
@@ -79,8 +35,6 @@ PRICE_FILTERS = {
 }
 
 
-def facility_filters() -> tuple[FacilityFilter, ...]:
-    return FACILITY_FILTERS
 
 
 def price_filter_options() -> tuple[tuple[str, str], ...]:
