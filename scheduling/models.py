@@ -12,6 +12,9 @@ class Trainer(models.Model):
     name = models.CharField(max_length=150)
     specialties = models.CharField(max_length=255)
     bio = models.TextField(blank=True)
+    price_per_session = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    likes = models.PositiveIntegerField(default=0)
+    calendly_url = models.URLField(blank=True)
     rating_avg = models.FloatField(default=0)
     is_active = models.BooleanField(default=True)
 

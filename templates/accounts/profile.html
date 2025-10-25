@@ -3,23 +3,35 @@
 {% block title %}Profile · FitMatrix{% endblock %}
 {% block content %}
 <section class="max-w-[1200px] mx-auto px-4 sm:px-6 py-12 space-y-8">
-  <div class="glass card flex flex-col md:flex-row md:items-center gap-6 animate-in">
-    <div class="relative">
-      <div class="w-24 h-24 rounded-full overflow-hidden ring-4 ring-[var(--emerald)]">
-        {% if request.user.avatar %}
-          <img src="{{ request.user.avatar.url }}" alt="{{ request.user.display_name }} avatar" class="w-full h-full object-cover" />
-        {% else %}
-          <div class="w-full h-full bg-white/10 grid place-items-center text-3xl font-bold">{{ request.user.username|slice:":2"|upper }}</div>
-        {% endif %}
+  <div class="glass card flex flex-col md:flex-row md:items-center md:justify-between gap-6 animate-in">
+    <div class="flex items-center gap-6">
+      <div class="relative">
+        <div class="w-24 h-24 rounded-full overflow-hidden ring-4 ring-[var(--emerald)]">
+          {% if request.user.avatar %}
+            <img src="{{ request.user.avatar.url }}" alt="{{ request.user.display_name }} avatar" class="w-full h-full object-cover" />
+          {% else %}
+            <div class="w-full h-full bg-white/10 grid place-items-center text-3xl font-bold">{{ request.user.username|slice:":2"|upper }}</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="space-y-1">
+        <h2 class="text-2xl font-semibold drop-shadow">{{ request.user.display_name }}</h2>
+        <p class="text-white/70">{{ request.user.email }}</p>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold {% if request.user.is_admin %}bg-[var(--emerald)] text-black{% else %}bg-[var(--mint)] text-black{% endif %}">
+          {% if request.user.is_admin %}ADMIN{% else %}USER{% endif %}
+        </span>
       </div>
     </div>
-    <div class="space-y-1">
-      <h2 class="text-2xl font-semibold drop-shadow">{{ request.user.display_name }}</h2>
-      <p class="text-white/70">{{ request.user.email }}</p>
-      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold {% if request.user.is_admin %}bg-[var(--emerald)] text-black{% else %}bg-[var(--mint)] text-black{% endif %}">
-        {% if request.user.is_admin %}ADMIN{% else %}USER{% endif %}
-      </span>
-    </div>
+    <form method="post" action="{% url 'accounts:logout' %}" class="self-start md:self-auto">
+      {% csrf_token %}
+      <button type="submit" class="matrix-btn" data-variant="danger">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H9m0 0l2.25-2.25M9 12l2.25 2.25" />
+        </svg>
+        <span>Log out</span>
+      </button>
+    </form>
   </div>
   <div class="md:grid md:grid-cols-3 gap-6">
     <nav class="glass card space-y-2 md:sticky md:top-20 h-fit">
@@ -131,7 +143,7 @@
           {% else %}
             <div class="text-center text-white/70 py-10">
               <p>No past appointments yet.</p>
-              <a href="{% url 'places:list' %}" class="text-[var(--green-300)] hover:text-[var(--green-200)]">Browse places</a>
+              <a href="{% url 'search:results' %}" class="text-[var(--green-300)] hover:text-[var(--green-200)]">Browse places</a>
             </div>
           {% endif %}
         </div>
@@ -163,7 +175,16 @@
               <article class="glass p-4 bg-white/5 flex flex-col gap-2">
                 <div class="flex items-center justify-between">
                   <h5 class="font-semibold">{% if item.place %}{{ item.place.name }}{% else %}{{ item.trainer.name }}{% endif %}</h5>
-                  <button type="button" class="btn glass px-3" data-wishlist-kind="{% if item.place %}place{% else %}trainer{% endif %}" data-wishlist-id="{% if item.place %}{{ item.place.id }}{% else %}{{ item.trainer.id }}{% endif %}">
+                  <button
+                    type="button"
+                    class="btn glass px-3"
+                    data-wishlist-toggle
+                    data-url="{% if item.place %}{% url 'wishlist:toggle' 'place' item.place.id %}{% else %}{% url 'wishlist:toggle' 'trainer' item.trainer.id %}{% endif %}"
+                    data-active="true"
+                    data-label-active="♥"
+                    data-label-inactive="♡"
+                    aria-pressed="true"
+                  >
                     ♥
                   </button>
                 </div>
@@ -172,10 +193,14 @@
             {% endfor %}
           </div>
           {% include "components/paginator.html" with page_obj=wishlist_page %}
-        {% else %}
-          <div class="text-center text-white/70 py-10">
+          <div id="profile-wishlist-empty" class="text-center text-white/70 py-10 hidden">
             <p>Wishlist is empty.</p>
-            <a href="{% url 'places:list' %}" class="text-[var(--green-300)] hover:text-[var(--green-200)]">Explore places</a>
+            <a href="{% url 'search:results' %}" class="text-[var(--green-300)] hover:text-[var(--green-200)]">Explore places</a>
+          </div>
+        {% else %}
+          <div class="text-center text-white/70 py-10" id="profile-wishlist-empty">
+            <p>Wishlist is empty.</p>
+            <a href="{% url 'search:results' %}" class="text-[var(--green-300)] hover:text-[var(--green-200)]">Explore places</a>
           </div>
         {% endif %}
       </section>
@@ -199,25 +224,26 @@
       }
     });
   }
-  const csrfInput = document.querySelector('#profile-form input[name="csrfmiddlewaretoken"]');
-  const csrfToken = csrfInput ? csrfInput.value : '';
-  document.querySelectorAll('[data-wishlist-kind]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const kind = button.getAttribute('data-wishlist-kind');
-      const id = button.getAttribute('data-wishlist-id');
-      fetch(`{% url 'accounts:wishlist-toggle' 'place' 0 %}`.replace('place/0', `${kind}/${id}`), {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'X-CSRFToken': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      }).then((response) => response.json()).then((data) => {
-        if (data.status === 'removed') {
-          button.closest('article').remove();
-        }
-      });
+  const wishlistGrid = document.getElementById('wishlist-grid');
+  const wishlistPaginator = wishlistGrid ? wishlistGrid.nextElementSibling : null;
+  const wishlistEmpty = document.getElementById('profile-wishlist-empty');
+  if (wishlistGrid) {
+    document.addEventListener('wishlist:toggled', (event) => {
+      const { button, added } = event.detail || {};
+      if (!button || added !== false) {
+        return;
+      }
+      if (!wishlistGrid.contains(button)) {
+        return;
+      }
+      const card = button.closest('article');
+      card?.remove();
+      if (!wishlistGrid.querySelector('article') && wishlistEmpty) {
+        wishlistGrid.classList.add('hidden');
+        wishlistPaginator?.classList.add('hidden');
+        wishlistEmpty.classList.remove('hidden');
+      }
     });
-  });
+  }
 </script>
 {% endblock %}

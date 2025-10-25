@@ -1,12 +1,26 @@
 from __future__ import annotations
 
 import base64
-import imghdr
 from typing import Any
 
 _MIN_PNG = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII="
 )
+_IMAGE_SIGNATURES = (
+    (b"\x89PNG\r\n\x1a\n", "PNG"),
+    (b"\xff\xd8\xff\xe0", "JPEG"),  # JPEG JFIF
+    (b"\xff\xd8\xff\xe1", "JPEG"),  # JPEG EXIF
+    (b"\xff\xd8\xff\xdb", "JPEG"),  # JPEG quantization tables
+)
+
+
+def _basic_image_type(data: bytes) -> str | None:
+    for signature, name in _IMAGE_SIGNATURES:
+        if data.startswith(signature):
+            return name
+    if data.startswith(b"\xff\xd8"):
+        return "JPEG"
+    return None
 
 
 class ImageFile:
@@ -39,8 +53,7 @@ class ImageFile:
 def open(file_obj: Any) -> ImageFile:
     data = file_obj.read()
     file_obj.seek(0)
-    kind = imghdr.what(None, data)
-    fmt = (kind or "png").upper()
+    fmt = _basic_image_type(data) or "PNG"
     return ImageFile(data=data, format=fmt)
 
 

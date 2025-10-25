@@ -1,92 +1,216 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" class="h-full">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}FitMatrix{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      :root {
-        --green-950:#023D27; --green-900:#036D3D; --green-700:#0B8643; --green-600:#03B863; --green-400:#7FEB45; --green-300:#9BF84E; --green-200:#B9FF58; --chartreuse:#E4FF05; --mint:#B6F7CF; --jade:#2ECF73; --emerald:#0AAE5A;
-      }
-      body {
-        min-height: 100vh;
-        background-image: linear-gradient(135deg, #036D3D 0%, #0f1f17 45%, #0b0f0d 100%);
-        color: white;
-      }
-      .glass {backdrop-filter: blur(16px); background: rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); border-radius:1.25rem; box-shadow:0 10px 30px rgba(0,0,0,.35)}
-      .card {padding:1.5rem;}
-      @media (min-width:768px){.card{padding:2rem;}}
-      .btn {border-radius:0.75rem;padding:0.5rem 1rem;font-weight:600;transition:all .2s ease;}
-      .btn:disabled{opacity:.6;cursor:not-allowed;}
-      .btn-primary {color:#fff;background:var(--green-600);} .btn-primary:hover{background:var(--green-900);} .btn-primary:focus{outline:none;box-shadow:0 0 0 3px rgba(127,235,69,.4);}
-      .input {width:100%;border-radius:0.75rem;background-color:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:0.5rem 1rem;color:#fff;}
-      .input::placeholder{color:rgba(255,255,255,.6);} .input:focus{outline:none;background:rgba(255,255,255,.15);box-shadow:0 0 0 3px rgba(127,235,69,.4);}
-      @keyframes fadeInUp { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:translateY(0)} }
-      .animate-in { animation: fadeInUp .2s ease-out both }
-      .delay-1{animation-delay:.2s}.delay-2{animation-delay:.4s}.delay-3{animation-delay:.6s}.delay-4{animation-delay:.8s}
-      ::selection {background: rgba(127, 235, 69, .5); color: #000;}
-    </style>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Koulen&family=Palanquin+Dark:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link rel="stylesheet" href="{% static 'css/matrix.css' %}" />
     {% block extra_head %}{% endblock %}
   </head>
-  <body class="min-h-screen selection:bg-[#7FEB45]/50 selection:text-black flex flex-col">
-    <header class="sticky top-0 z-40 backdrop-blur-lg bg-white/5 border-b border-white/10">
-      <nav class="max-w-[1200px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <a href="{% url 'home' %}" class="text-xl font-semibold tracking-tight">FitMatrix</a>
-        <button class="md:hidden btn glass px-3 py-2" aria-label="Toggle navigation" data-menu-toggle>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 6h16.5m-16.5 6h16.5" />
-          </svg>
-        </button>
-        <div class="hidden md:flex items-center gap-6 text-sm font-medium">
-          <a class="hover:text-[var(--green-200)] transition" href="{% url 'home' %}">Home</a>
-          <a class="hover:text-[var(--green-200)] transition" href="{% url 'places:list' %}">Places</a>
-          <a class="hover:text-[var(--green-200)] transition" href="{% url 'scheduling:sessions' %}">Trainers</a>
-          <a class="hover:text-[var(--green-200)] transition" href="#">Search</a>
-          <a class="hover:text-[var(--green-200)] transition" href="{% url 'accounts:wishlist' %}">Wishlist</a>
+  <body class="matrix-body">
+    <div class="matrix-global-bg" aria-hidden="true"></div>
+    <div class="matrix-shell flex flex-col min-h-screen">
+
+      <!-- HEADER -->
+      <header class="fixed top-0 inset-x-0 z-50 px-4 sm:px-6 lg:px-10 py-6">
+        <div class="max-w-6xl mx-auto relative overflow-hidden flex items-center justify-between gap-6 rounded-[50px] border border-black/10 shadow-md px-6 py-3"
+             style="background: linear-gradient(21deg,#FDFEFD 0%,#F0FDF4 100%);">
+
+          <!-- Brand -->
+          <a href="{% url 'home' %}" class="relative flex items-center gap-3 pl-5">
+            <img src="{% static 'img/logo-mark.png' %}" alt="FitMatrix Mark" class="w-16 h-16 object-contain" />
+            <span class="inline-flex items-center">
+              <span class="ml-1 text-[30px] tracking-[0.3em] font-[Koulen]">FITMATRIX</span>
+            </span>
+          </a>
+
+          {% url 'home' as home_url %}
+          {% url 'search:results' as search_url %}
+          {% url 'scheduling:sessions' as sessions_url %}
+          {% url 'scheduling:booking-manage' as booking_manage_url %}
+          {% url 'accounts:wishlist_page' as wishlist_url %}
+          {% with match=request.resolver_match url_name=match.url_name|default:'' %}
+
+        <!-- NAV -->
+        <nav class="matrix-nav hidden lg:flex items-center gap-10 text-[20px] tracking-[0.25em]" style="font-family: 'Koulen', system-ui, sans-serif;">
+          <a href="{{ home_url }}" {% if request.path == home_url %}aria-current="page"{% endif %}>Home</a>
+          <a href="{{ search_url }}" {% if match and match.app_name == 'search' %}aria-current="page"{% endif %}>Places</a>
+          <a href="{{ sessions_url }}" {% if match and match.app_name == 'scheduling' and url_name|slice:':7' != 'booking' %}aria-current="page"{% endif %}>Trainers</a>
+          <a href="{{ wishlist_url }}" {% if match and match.url_name == 'list' %}aria-current="page"{% endif %}>Wishlist</a>
+
+          {# ==== ADMIN PANEL (Desktop) ==== #}
           {% if request.user.is_authenticated %}
-            <a class="hover:text-[var(--green-200)] transition" href="{% url 'accounts:profile' %}">Profile</a>
+            {% if request.user.is_superuser or request.user.is_staff or request.user.is_admin %}
+              {% url 'accounts:admin-console' as admin_console_url %}
+              {% with url_name=request.resolver_match.url_name %}
+                {% with admin_pages=' admin-console admin-users admin-places admin-place-create admin-place-edit admin-trainers admin-trainer-create admin-trainer-edit admin-slots admin-slot-create admin-slot-edit admin-bookings admin-reviews ' %}
+                  <a href="{{ admin_console_url }}"
+                      {% if ' '|add:url_name|add:' ' in admin_pages %}aria-current="page"{% endif %}>
+                    Admin panel
+                  </a>
+                {% endwith %}
+              {% endwith %}
+            {% endif %}
+          {% endif %}
+        </nav>
+
+        <!-- Right actions -->
+        <div class="hidden lg:flex items-center gap-3 pr-5">
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'accounts:profile' %}" class="px-6 py-2.5 rounded-full font-extrabold tracking-wide
+                  text-[#08381F]
+                  bg-gradient-to-r from-[#CFFF93] to-[#EFFF9E]
+                  border-2 border-[#0AAE5A]
+                  shadow-[0_4px_10px_rgba(212,255,111,0.35)]
+                  hover:shadow-[0_6px_16px_rgba(212,255,111,0.45)]
+                  hover:border-[#0AAE5A]
+                  hover:scale-[1.04] active:scale-[0.98]
+                  transition-all duration-300 ease-out" data-variant="ghost">Profile</a>
+            <a href="{{ booking_manage_url }}" class="px-6 py-2.5 rounded-full font-extrabold tracking-wide
+                  text-[#08381F]
+                  bg-gradient-to-r from-[#CFFF93] to-[#EFFF9E]
+                  border-2 border-[#0AAE5A]
+                  shadow-[0_4px_10px_rgba(212,255,111,0.35)]
+                  hover:shadow-[0_6px_16px_rgba(212,255,111,0.45)]
+                  hover:border-[#0AAE5A]
+                  hover:scale-[1.04] active:scale-[0.98]
+                  transition-all duration-300 ease-out" data-variant="ghost">Bookings</a>
           {% else %}
-            <a class="hover:text-[var(--green-200)] transition" href="{% url 'accounts:login' %}">Login</a>
+          <a href="{% url 'accounts:login' %}"
+          class="px-6 py-2.5 rounded-full font-extrabold tracking-wide
+                  text-[#08381F]
+                  bg-gradient-to-r from-[#CFFF93] to-[#EFFF9E]
+                  border-2 border-[#0AAE5A]
+                  shadow-[0_4px_10px_rgba(212,255,111,0.35)]
+                  hover:shadow-[0_6px_16px_rgba(212,255,111,0.45)]
+                  hover:border-[#0AAE5A]
+                  hover:scale-[1.04] active:scale-[0.98]
+                  transition-all duration-300 ease-out">
+          LOGIN
+        </a>
           {% endif %}
         </div>
-      </nav>
-      <div class="md:hidden hidden flex-col gap-2 px-4 pb-4 transition-all duration-200" data-mobile-menu>
-        <a class="hover:text-[var(--green-200)]" href="{% url 'home' %}">Home</a>
-        <a class="hover:text-[var(--green-200)]" href="{% url 'places:list' %}">Places</a>
-        <a class="hover:text-[var(--green-200)]" href="{% url 'scheduling:sessions' %}">Trainers</a>
-        <a class="hover:text-[var(--green-200)]" href="#">Search</a>
-        <a class="hover:text-[var(--green-200)]" href="{% url 'accounts:wishlist' %}">Wishlist</a>
-        {% if request.user.is_authenticated %}
-          <a class="hover:text-[var(--green-200)]" href="{% url 'accounts:profile' %}">Profile</a>
-        {% else %}
-          <a class="hover:text-[var(--green-200)]" href="{% url 'accounts:login' %}">Login</a>
-        {% endif %}
-      </div>
-    </header>
-    <main class="flex-1 w-full">
-      {% block content %}{% endblock %}
-    </main>
-    <footer class="mt-12 py-8 text-center text-sm text-white/70">
-      Crafted for FitMatrix &copy; {% now "Y" %}
-    </footer>
-    <div class="fixed top-4 right-4 space-y-3 z-50" role="status" aria-live="polite">
+        {% endwith %}
+
+          <!-- MOBILE TOGGLE -->
+          <button type="button" class="lg:hidden matrix-btn relative" data-mobile-toggle data-variant="ghost" aria-label="Toggle navigation">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- MOBILE MENU -->
+        <div class="lg:hidden max-w-6xl mx-auto" data-mobile-menu style="max-height: 0; overflow: hidden; transition: max-height 240ms ease;">
+          <div class="mt-3 px-6 py-5 flex flex-col gap-4 rounded-[26px] bg-white/80 backdrop-blur border border-black/10" style="font-family: 'Koulen', system-ui, sans-serif;">
+            <a href="{% url 'home' %}" class="nav-underline">Home</a>
+            <a href="{% url 'search:results' %}" class="nav-underline">Places</a>
+            <a href="{% url 'scheduling:sessions' %}">Trainers</a>
+            <a href="{% url 'wishlist:list' %}">Wishlist</a>
+
+            {# ==== ADMIN PANEL (Mobile) ==== #}
+            {% if request.user.is_authenticated %}
+              {% if request.user.is_superuser or request.user.is_staff or request.user.is_admin %}
+                {% with url_name=request.resolver_match.url_name %}
+                  <a href="{% url 'accounts:admin-console' %}">Admin panel</a>
+                {% endwith %}
+              {% endif %}
+              <a href="{% url 'scheduling:booking-manage' %}">Bookings</a>
+              <a href="{% url 'accounts:profile' %}">Profile</a>
+            {% else %}
+              <a href="{% url 'accounts:login' %}">Login</a>
+            {% endif %}
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN -->
+      <main class="flex-1 w-full">
+        <div class="pt-[140px] lg:pt-[160px]">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="bg-[#052315] text-[#EAF8F0] mt-24 border-t border-[#145734]/40">
+        <div class="max-w-6xl mx-auto px-6 py-14">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-y-10 gap-x-12 xl:gap-x-16 items-start">
+            <div class="sm:col-span-4">
+              <div class="flex items-center gap-3 mb-5">
+                <img src="{% static 'img/logo-mark.png' %}" alt="FitMatrix Logo" class="w-16 h-16 object-contain filter invert" />
+                <span class="text-[30px] tracking-[0.3em] font-[Koulen] whitespace-nowrap">FitMatrix</span>
+              </div>
+              <p class="text-white/85 leading-relaxed text-[15px]">Curated fitness ecosystems for Jakarta and beyond.</p>
+            </div>
+
+            <div class="sm:col-span-2">
+              <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">COMPANY</h4>
+              <p class="text-white/85 text-[15px] leading-relaxed">
+                Jalan Pondok Cina No. 1<br/>Universitas Indonesia
+              </p>
+              <p class="mt-3 text-[15px] leading-relaxed !text-white">
+                <span class="!text-white">Contact us:</span><br/>
+                <a href="mailto:admin@fitmatrix.id" class="underline decoration-dotted !text-white hover:!text-white transition">
+                  admin@fitmatrix.id
+                </a>
+              </p>
+            </div>
+
+            <div class="sm:col-span-2">
+              <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">PRODUCTS</h4>
+              <ul class="space-y-2 text-white/85 text-[15px]">
+                <li><a href="{% url 'search:results' %}" class="hover:text-white transition">Venues</a></li>
+                <li><a href="{% url 'scheduling:sessions' %}" class="hover:text-white transition">Trainers</a></li>
+              </ul>
+            </div>
+
+            <div class="sm:col-span-2">
+              <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">REFERENCE</h4>
+              <ul class="space-y-2 text-white/85 text-[15px]">
+                <li>
+                  <a href="https://docs.google.com/document/d/1ueQeJeebFoYu8T8pDJQ8Qm3Dz6r5DNgNzy3byXfRNrc/edit?usp=sharing"
+                     target="_blank" rel="noopener noreferrer"
+                     class="underline decoration-dotted hover:text-white transition">
+                    References
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="sm:col-span-2">
+              <h4 class="text-[#B5EB54] text-xs tracking-[0.25em] mb-3 font-[Koulen]">SUPPORTED BY</h4>
+              <p class="text-white/85 text-[15px]">Fasilkom UI</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-white/10">
+          <div class="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-white/65">
+            <p>&copy; {% now "Y" %} FitMatrix. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+    <div class="matrix-message-stack" role="status" aria-live="polite">
       {% for message in messages %}
-        <div class="glass px-4 py-3 flex items-start justify-between gap-4 shadow-lg {% if 'success' in message.tags %}bg-[var(--green-600)] text-black{% elif 'error' in message.tags %}bg-rose-500 text-white{% else %}bg-slate-600 text-white{% endif %}">
-          <span class="font-medium">{{ message }}</span>
-          <button type="button" class="text-sm" onclick="this.parentElement.remove()" aria-label="Dismiss">&times;</button>
+        <div class="matrix-toast" data-toast data-tone="{% if 'error' in message.tags %}error{% elif 'info' in message.tags %}info{% else %}success{% endif %}">
+          <span class="matrix-label">{{ message.tags|default:"info" }}</span>
+          <span>{{ message }}</span>
+          <button type="button" aria-label="Dismiss" data-toast-dismiss>&times;</button>
         </div>
       {% endfor %}
     </div>
-    <script>
-      const toggleBtn = document.querySelector('[data-menu-toggle]');
-      const mobileMenu = document.querySelector('[data-mobile-menu]');
-      if (toggleBtn && mobileMenu) {
-        toggleBtn.addEventListener('click', () => {
-          mobileMenu.classList.toggle('hidden');
-        });
-      }
-    </script>
+    <script src="{% static 'js/matrix.js' %}"></script>
     {% block extra_js %}{% endblock %}
+    <div id="portal-root" class="fixed inset-0 pointer-events-none z-[2147483647]"></div>
   </body>
 </html>

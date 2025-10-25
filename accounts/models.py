@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
+    email = models.EmailField(_("email address"), unique=True)
     class Roles(models.TextChoices):
         ADMIN = "ADMIN", "Admin"
         USER = "USER", "User"
@@ -25,6 +26,7 @@ class User(AbstractUser):
     def clean(self) -> None:
         super().clean()
         if self.email:
+            self.email = self.email.strip().lower()
             conflict = (
                 type(self)
                 .objects.exclude(pk=self.pk)
@@ -35,6 +37,8 @@ class User(AbstractUser):
                 raise ValidationError({"email": _("Email address must be unique.")})
 
     def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.email:
+            self.email = self.email.strip().lower()
         if not self.display_name:
             full_name = self.get_full_name().strip()
             self.display_name = full_name or self.username
@@ -70,7 +74,7 @@ class ActivityLog(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
-        return f"{self.user} • {self.get_type_display()}"
+        return f"{self.user} -> {self.get_type_display()}"
 
 
 class WishlistItem(models.Model):
@@ -117,4 +121,31 @@ class WishlistItem(models.Model):
 
     def __str__(self) -> str:
         target = self.place or self.trainer
-        return f"Wishlist({self.user} → {target})"
+        return f"Wishlist({self.user} -> {target})"
+
+
+class WishlistCollection(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="wishlist_collections")
+    name = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "name")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.user})"
+
+
+class CollectionItem(models.Model):
+    collection = models.ForeignKey(WishlistCollection, on_delete=models.CASCADE, related_name="items")
+    place = models.ForeignKey("places.Place", on_delete=models.CASCADE, related_name="collection_items")
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("collection", "place")
+        ordering = ["-added_at"]
+
+    def __str__(self) -> str:
+        return f"{self.collection} -> {self.place}"
