@@ -75,7 +75,14 @@ def booking_create(request: HttpRequest, pk: int) -> HttpResponse:
     slot = get_object_or_404(SessionSlot, pk=pk, is_active=True)
     form = BookingRequestForm(request.user, request.POST)
     if form.is_valid():
-        booking = Booking.objects.create(user=request.user, slot=form.cleaned_data["slot"])
+        slot = form.cleaned_data["slot"]
+        booking, created = Booking.objects.get_or_create(user=request.user, slot=slot)
+        if not created and booking.status == Booking.Status.CANCELLED:
+            booking.status = Booking.Status.BOOKED
+            booking.save(update_fields=["status", "updated_at"])
+        elif not created:
+            messages.error(request, "Unable to book this slot.")
+            return redirect("scheduling:trainer-detail", pk=slot.trainer_id)
         messages.success(
             request,
             f"Session with {booking.slot.trainer.name} on {timezone.localtime(booking.slot.start):%d %b %H:%M} confirmed.",
@@ -159,7 +166,11 @@ def upcoming_sessions(request: HttpRequest) -> HttpResponse:
     booked_slot_ids: set[int] = set()
     if request.user.is_authenticated:
         booked_slot_ids = set(
-            Booking.objects.filter(user=request.user, slot__in=[slot.pk for slot in slots]).values_list("slot_id", flat=True)
+            Booking.objects.filter(
+                user=request.user,
+                slot__in=[slot.pk for slot in slots],
+                status=Booking.Status.BOOKED,
+            ).values_list("slot_id", flat=True)
         )
     context = {
         "slots": slots,

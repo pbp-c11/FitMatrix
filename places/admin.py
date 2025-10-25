@@ -11,6 +11,8 @@ class PlaceAdmin(admin.ModelAdmin):
         "facility_type",
         "is_free",
         "price",
+        "latitude",
+        "longitude",
         "highlight_score",
         "is_active",
     )
@@ -37,6 +39,8 @@ class PlaceAdmin(admin.ModelAdmin):
                 "fields": (
                     "address",
                     "city",
+                    "latitude",
+                    "longitude",
                     "is_free",
                     "price",
                 )

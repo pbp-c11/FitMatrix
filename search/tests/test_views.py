@@ -52,7 +52,6 @@ class SearchViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         places = list(response.context["places"])
         self.assertEqual(places, [self.alpha])
-        self.assertIn("facility_filters", response.context)
         self.assertIn("recommended", response.context)
 
     def test_results_view_ajax_returns_partial_html(self) -> None:

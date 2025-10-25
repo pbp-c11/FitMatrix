@@ -1,108 +1,63 @@
-from __future__ import annotations
-
-from django.contrib.auth.decorators import login_required
-from django.db.models import Count
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.http import require_GET, require_POST
-
-from search.views import results_view as search_results_view
-
-from accounts.models import WishlistItem
-
-from .forms import ReviewForm
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 from .models import Place, Review
-from .services import recommended_places
 
 
-def place_list(request: HttpRequest) -> HttpResponse:
-    """Backward-compatible shim pointing to the dedicated search app."""
-    return search_results_view(request)
+# Halaman daftar tempat
+def place_list(request):
+    places = Place.objects.all()
+    return render(request, "places/list.html", {"places": places})
 
 
-@require_GET
-def place_detail(request, slug: str):
-    place = get_object_or_404(Place.objects.active(), slug=slug)
-    nearby = (
-        Place.objects.active()
-        .filter(facility_type=place.facility_type)
-        .exclude(pk=place.pk)
-        .order_by("-highlight_score", "-rating_avg")[:4]
-    )
-    is_favorite = False
-    if request.user.is_authenticated:
-        is_favorite = WishlistItem.objects.filter(user=request.user, place=place).exists()
-    return render(
-        request,
-        "places/detail.html",
-        {
-            "place": place,
-            "recommended": recommended_places(limit=6),
-            "nearby": nearby,
-            "is_favorite": is_favorite,
-        },
-    )
+# Halaman detail tempat
+def place_detail(request, slug):
+    place = get_object_or_404(Place, slug=slug)
+    reviews = Review.objects.filter(place=place).order_by("-created_at")
+    return render(request, "places/detail.html", {"place": place, "reviews": reviews})
 
-ALLOWED_REVIEW_SORTS = {"created_at", "liked", "rating"}
 
-def _sorted_reviews_qs(place, sort, direction):
-    qs = Review.objects.filter(place=place).select_related("user")
-    if sort == "liked":
-        qs = qs.annotate(like_count=Count("likes")); key = "like_count"
-    elif sort == "rating":
-        key = "rating"
-    else:
-        key = "created_at"
-    return qs.order_by(key if direction == "asc" else f"-{key}", "-id")
+# Partial untuk reviews (AJAX / fragment)
+def place_reviews_partial(request, slug):
+    place = get_object_or_404(Place, slug=slug)
+    reviews = Review.objects.filter(place=place).order_by("-created_at")
+    return render(request, "places/_reviews.html", {"place": place, "reviews": reviews})
 
-@require_GET
-def place_reviews_partial(request, slug: str):
-    mgr = getattr(Place.objects, "active", None)
-    place = get_object_or_404(mgr() if callable(mgr) else Place.objects.all(), slug=slug)
 
-    sort = request.GET.get("sort", "created_at")
-    direction = request.GET.get("dir", "desc")
-    if sort not in ALLOWED_REVIEW_SORTS or direction not in {"asc","desc"}:
-        return HttpResponseBadRequest("Invalid sort parameter")
+# Buat review baru (FULL FIX)
+def place_review_create(request, slug):
+    place = get_object_or_404(Place, slug=slug)
 
-    reviews = _sorted_reviews_qs(place, sort, direction)
+    if request.method == "POST":
+        body = request.POST.get("body", "").strip()
+        rating = request.POST.get("rating")
 
-    return render(
-        request,
-        "places/_reviews.html",
-        {
-            "place": place,
-            "reviews": reviews,
-            "active_sort": sort,
-            "active_dir": direction,
-        },
-    )
+        # Validasi
+        if not body or not rating:
+            return JsonResponse({"success": False, "error": "Please fill in all fields."}, status=400)
 
-@require_POST
-@login_required
-def place_review_create(request, slug: str):
-    """Submit review via AJAX; balas partial list terbaru."""
-    mgr = getattr(Place.objects, "active", None)
-    place = get_object_or_404(mgr() if callable(mgr) else Place.objects.all(), slug=slug)
+        try:
+            rating = int(rating)
+        except ValueError:
+            return JsonResponse({"success": False, "error": "Invalid rating value."}, status=400)
 
-    form = ReviewForm(request.POST)
-    if form.is_valid():
-        Review.objects.create(
+        if not request.user.is_authenticated:
+            return JsonResponse({"success": False, "error": "You must be logged in."}, status=403)
+
+        # Simpan ke database
+        review = Review.objects.create(
             place=place,
             user=request.user,
-            rating=int(form.cleaned_data["rating"]),
-            body=form.cleaned_data.get("body", "").strip(),
+            body=body,
+            rating=rating,
         )
-        # setelah simpan, render ulang daftar review (default: terbaru duluan)
-        reviews = _sorted_reviews_qs(place, sort="created_at", direction="desc")
-        html = render(request, "places/_reviews.html", {
-            "place": place,
-            "reviews": reviews,
-            "active_sort": "created_at",
-            "active_dir": "desc",
-        }).content.decode("utf-8")
-        return JsonResponse({"ok": True, "html": html})
 
-    # kirim error form
-    errors_html = render(request, "places/_review_form_errors.html", {"form": form}).content.decode("utf-8")
-    return JsonResponse({"ok": False, "errors_html": errors_html}, status=400)
+        # Jika request dari AJAX
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            review_html = render_to_string("places/_single_review.html", {"review": review})
+            return JsonResponse({"success": True, "html": review_html})
+
+        # Fallback normal redirect
+        return redirect("places:detail", slug=place.slug)
+
+    return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)

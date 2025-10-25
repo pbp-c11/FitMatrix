@@ -8,7 +8,6 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET
 
 from places.services import (
-    facility_filters,
     price_filter_options,
     recommended_places,
     search_places,
@@ -49,7 +48,6 @@ def results_view(request: HttpRequest) -> HttpResponse:
     context = {
         "places": places,
         "query": query,
-        "facility_filters": facility_filters(),
         "selected_type": (facility_type or "ALL").upper(),
         "selected_price": price_key or "",
         "price_filters": price_filter_options(),

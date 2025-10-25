@@ -53,6 +53,20 @@ class Place(models.Model):
     tags = models.CharField(max_length=255, blank=True)
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Geographic latitude for map links.",
+    )
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Geographic longitude for map links.",
+    )
     facility_type = models.CharField(
         max_length=32,
         choices=FacilityType.choices,
@@ -120,6 +134,11 @@ class Place(models.Model):
 
     def primary_color(self) -> str:
         return self.accent_color or "#03B863"
+
+    def google_maps_url(self) -> str | None:
+        if self.latitude is not None and self.longitude is not None:
+            return f"https://www.google.com/maps/search/?api=1&query={self.latitude},{self.longitude}"
+        return None
 
     def amenities_list(self) -> list[str]:
         value = self.amenities or []

@@ -71,13 +71,15 @@
     {% include "components/paginator.html" with page_obj=page_obj %}
     <div class="matrix-empty-state" data-wishlist-empty hidden>
       <h2>No favourites yet</h2>
-      <p>Explore places and trainers to start building your FitMatrix.</p>
+      <p>Explore places and trainers to start building your FitMatrix.</p> 
+      <br>
       <a href="{% url 'search:results' %}" class="matrix-btn">Browse venues</a>
     </div>
   {% else %}
     <div class="matrix-empty-state" data-wishlist-empty>
       <h2>No favourites yet</h2>
       <p>Explore places and trainers to start building your FitMatrix.</p>
+      <br>
       <a href="{% url 'search:results' %}" class="matrix-btn">Browse venues</a>
     </div>
   {% endif %}

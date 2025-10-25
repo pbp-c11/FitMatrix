@@ -104,7 +104,7 @@ class RegisterForm(AvatarProcessingMixin, UserCreationForm):
         fields = ("username", "email", "display_name", "password1", "password2", "avatar")
 
     def clean_email(self) -> str:
-        email = self.cleaned_data.get("email", "").strip()
+        email = self.cleaned_data.get("email", "").strip().lower()
         if User.objects.filter(email__iexact=email).exists():
             raise ValidationError(_("Email address must be unique."))
         return email
@@ -148,7 +148,7 @@ class AdminUserCreationForm(UserCreationForm):
                 field.widget.attrs.setdefault(key, value)
 
     def clean_email(self) -> str:
-        email = self.cleaned_data.get("email", "").strip()
+        email = self.cleaned_data.get("email", "").strip().lower()
         if User.objects.filter(email__iexact=email).exists():
             raise ValidationError(_("Email address must be unique."))
         return email
@@ -280,6 +280,8 @@ class AdminPlaceForm(forms.ModelForm):
             "tags",
             "address",
             "city",
+            "latitude",
+            "longitude",
             "facility_type",
             "amenities",
             "highlight_score",
@@ -297,6 +299,20 @@ class AdminPlaceForm(forms.ModelForm):
             "tags": forms.TextInput(attrs={"class": "input"}),
             "address": forms.TextInput(attrs={"class": "input"}),
             "city": forms.TextInput(attrs={"class": "input"}),
+            "latitude": forms.NumberInput(
+                attrs={
+                    "class": "input",
+                    "step": "0.000001",
+                    "placeholder": "-6.175392",
+                }
+            ),
+            "longitude": forms.NumberInput(
+                attrs={
+                    "class": "input",
+                    "step": "0.000001",
+                    "placeholder": "106.827153",
+                }
+            ),
             "facility_type": forms.Select(attrs={"class": "input"}),
             "highlight_score": forms.NumberInput(attrs={"class": "input"}),
             "accent_color": forms.TextInput(attrs={"class": "input", "placeholder": "#03B863"}),

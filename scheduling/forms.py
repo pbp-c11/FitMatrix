@@ -67,7 +67,10 @@ class BookingRequestForm(forms.Form):
             raise forms.ValidationError("This slot has already started.")
         if slot.seats_left() <= 0:
             raise forms.ValidationError("This slot is fully booked.")
-        if Booking.objects.filter(user=self.user, slot=slot).exists():
+        if (
+            Booking.objects.filter(user=self.user, slot=slot, status=Booking.Status.BOOKED)
+            .exists()
+        ):
             raise forms.ValidationError("You have already booked this slot.")
         return slot
 

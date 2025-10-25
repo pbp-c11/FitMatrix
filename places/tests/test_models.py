@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from decimal import Decimal
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -70,6 +72,28 @@ class PlaceModelTests(TestCase):
         )
         url = place.get_absolute_url()
         self.assertEqual(url, reverse("places:detail", kwargs={"slug": place.slug}))
+
+    def test_google_maps_url_requires_coordinates(self) -> None:
+        without_coords = Place.objects.create(
+            name="No Coordinates",
+            address="Jl. Malioboro",
+            city="Yogyakarta",
+            is_free=True,
+        )
+        self.assertIsNone(without_coords.google_maps_url())
+
+        with_coords = Place.objects.create(
+            name="With Coordinates",
+            address="Jl. Malioboro",
+            city="Yogyakarta",
+            is_free=True,
+            latitude=Decimal("-7.793121"),
+            longitude=Decimal("110.365776"),
+        )
+        self.assertEqual(
+            with_coords.google_maps_url(),
+            "https://www.google.com/maps/search/?api=1&query=-7.793121,110.365776",
+        )
 
     def test_queryset_helpers_chainable(self) -> None:
         amenity_place = Place.objects.create(
