@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-import mimetypes
 
 from django.core.management.utils import get_random_secret_key
 
@@ -17,7 +16,7 @@ ALLOWED_HOSTS = [
     "3l2lkyxcstmm7g-8000.proxy.runpod.net",  # your RunPod proxy host
     ".proxy.runpod.net",                      # wildcard for other RunPod proxy hosts
     "100.65.28.156",                          # your pod/private IP if you need it
-    "fadhil-daffa-fitmatrix.pbp.cs.ui.ac.id",
+    "fadhil-daffa-fitmatrix.pbp.cs.ui.ac.id",  # your custom domain if you have one
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -121,7 +120,6 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-mimetypes.add_type("text/css", ".css", True)
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
