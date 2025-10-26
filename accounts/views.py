@@ -132,6 +132,7 @@ def create_collection_view(request):
         try:
             place = get_object_or_404(Place, pk=place_id)
             CollectionItem.objects.get_or_create(collection=collection, place=place)
+            WishlistItem.objects.get_or_create(user=request.user, place=place)
         except Exception:
             return JsonResponse({"error": "Invalid place_id"}, status=400)
 
@@ -162,6 +163,7 @@ def add_to_collection_view(request):
     place = get_object_or_404(Place, pk=place_id)
 
     CollectionItem.objects.get_or_create(collection=collection, place=place)
+    WishlistItem.objects.get_or_create(user=request.user, place=place)
     return JsonResponse(
         {"status": "added", "collection": {"id": collection.id, "name": collection.name}}
     )

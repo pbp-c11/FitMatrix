@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.db.models import Avg
 from .models import Place, Review
 
 
@@ -52,6 +53,10 @@ def place_review_create(request, slug):
             rating=rating,
         )
 
+        avg_rating = place.reviews.aggregate(avg=Avg("rating"))["avg"] or 0
+        place.rating_avg = avg_rating
+        place.save(update_fields=["rating_avg"])
+
         # Jika request dari AJAX
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             review_html = render_to_string("places/_single_review.html", {"review": review})
@@ -61,3 +66,4 @@ def place_review_create(request, slug):
         return redirect("places:detail", slug=place.slug)
 
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
+

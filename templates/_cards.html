@@ -13,7 +13,8 @@ Usage example:
           {% if img.url %}
             <img src="{{ img.url }}" alt="{{ place.name }}" class="w-full h-48 object-cover" />
           {% else %}
-            <img src="{{ img }}" alt="{{ place.name }}" class="w-full h-48 object-cover" />
+            <img src="{% if img and '://' in img %}{{ img }}{% else %}{% static img %}{% endif %}"
+                 alt="{{ place.name }}" class="w-full h-48 object-cover" />
           {% endif %}
         {% else %}
           <img src="https://placehold.co/642x361" alt="{{ place.name }}" class="w-full h-48 object-cover" />
@@ -43,8 +44,13 @@ Usage example:
         {{ place.summary|default:place.tagline|default:"Premium multi-zone facility." }}
       </p>
 
-      <div class="pt-2">
+      <div class="pt-2 flex flex-wrap gap-2">
         <a href="{% url 'places:detail' place.slug %}" class="matrix-btn" data-variant="ghost">View Space</a>
+        {% if place.google_maps_url %}
+          <a href="{{ place.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="matrix-btn" data-variant="ghost">
+            View on Map
+          </a>
+        {% endif %}
       </div>
     </div>
   </article>

@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
+    email = models.EmailField(_("email address"), unique=True)
     class Roles(models.TextChoices):
         ADMIN = "ADMIN", "Admin"
         USER = "USER", "User"
@@ -25,6 +26,7 @@ class User(AbstractUser):
     def clean(self) -> None:
         super().clean()
         if self.email:
+            self.email = self.email.strip().lower()
             conflict = (
                 type(self)
                 .objects.exclude(pk=self.pk)
@@ -35,6 +37,8 @@ class User(AbstractUser):
                 raise ValidationError({"email": _("Email address must be unique.")})
 
     def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.email:
+            self.email = self.email.strip().lower()
         if not self.display_name:
             full_name = self.get_full_name().strip()
             self.display_name = full_name or self.username
