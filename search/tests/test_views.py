@@ -85,3 +85,21 @@ class SearchViewTests(TestCase):
         )
         self.assertEqual(list(response.context["places"]), [gamma])
         self.assertEqual(response.context["selected_price"], "budget")
+
+    def test_sort_newest_orders_by_creation_time(self) -> None:
+        gamma = Place.objects.create(
+            name="Gamma Arena",
+            address="Jl. Dahlia",
+            city="Jakarta",
+            facility_type=Place.FacilityType.GYM,
+            amenities=["Sauna"],
+            highlight_score=2,
+            rating_avg=4.0,
+            likes=10,
+        )
+        response = self.client.get(
+            reverse("search:results"),
+            {"sort": "newest"},
+        )
+        places = list(response.context["places"])
+        self.assertEqual(places[0], gamma)

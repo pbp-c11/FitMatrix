@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from getpass import getpass
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
@@ -28,14 +27,7 @@ class Command(BaseCommand):
 
         password = options.get("password") or os.environ.get("FITMATRIX_ADMIN_PASSWORD")
         if not password:
-            if not self.stdin.isatty():
-                raise CommandError("Password is required. Provide --password or FITMATRIX_ADMIN_PASSWORD.")
-            password = getpass("Admin password: ")
-            confirm = getpass("Confirm password: ")
-            if password != confirm:
-                raise CommandError("Passwords did not match.")
-        if not password:
-            raise CommandError("Password cannot be blank.")
+            raise CommandError("Password is required. Provide --password or FITMATRIX_ADMIN_PASSWORD.")
 
         User = get_user_model()
         email_option = options.get("email")
@@ -44,10 +36,11 @@ class Command(BaseCommand):
         display_name = display_name_option.strip() if display_name_option else username
 
         try:
-            user, created = User.objects.get_or_create(
-                username=username,
-                defaults={"email": email, "display_name": display_name},
-            )
+            user = User.objects.get(username=username)
+            created = False
+        except User.DoesNotExist:
+            user = User(username=username, email=email, display_name=display_name)
+            created = True
         except User.MultipleObjectsReturned as exc:  # pragma: no cover - sanity guard
             raise CommandError("Multiple users found with that username.") from exc
 
