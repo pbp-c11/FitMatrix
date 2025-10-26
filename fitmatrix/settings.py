@@ -16,6 +16,7 @@ ALLOWED_HOSTS = [
     "3l2lkyxcstmm7g-8000.proxy.runpod.net",  # your RunPod proxy host
     ".proxy.runpod.net",                      # wildcard for other RunPod proxy hosts
     "100.65.28.156",                          # your pod/private IP if you need it
+    "fadhil-daffa-fitmatrix.pbp.cs.ui.ac.id",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
