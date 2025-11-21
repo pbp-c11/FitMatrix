@@ -23,15 +23,14 @@ User ini ditargetkan pada sebagian besar Sport Enthusiast yang butuh referensi t
 - 🔥 Mendapatkan rekomendsi Trending Coordinates
 - 🤝 Melakukan booking appointment Personal trainer/Coach
 
-2. Admin
-Admin bertugas mengelola data di aplikasi:
+2. Admin -  bertugas mengelola data di aplikasi:
 - ➕ Menambah lokasi spot olahraga & personal trainer/coach di Jabodetabek
 - ✏️ Mengedit dan menghapus data spot olahraga & trainer
 - ❌ Cancel appointment PT/Coach
 
 ## Daftar Modul 🗂️
-- 👥 Auth & Profile (Modul Autentikasi dan Profil Pengguna)
-Modul ini mengelola registrasi, login, dan profil pengguna. Pengguna yang sudah login dapat mengelola data pribadi mereka, serta mengakses fitur-fitur lain seperti add tempat ke wishlist dan memberikan review suatu tempat.
+👥 Auth & Profile (Modul Autentikasi dan Profil Pengguna)
+-> Modul ini mengelola registrasi, login, dan profil pengguna. Pengguna yang sudah login dapat mengelola data pribadi mereka, serta mengakses fitur-fitur lain seperti add tempat ke wishlist dan memberikan review suatu tempat.
 
 Fitur Utama:
 - Registrasi, login, dan pengelolaan akun.
