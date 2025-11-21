@@ -39,7 +39,11 @@ Fitur Utama:
 
 Integrasi: Terkoneksi dengan modul Wishlist, Review, dan Appointment.
 
-- 🔍 Search (Modul Pencarian)
+
+
+🔍 Search (Modul Pencarian)
+-> Memudahkan pengguna mencari tempat olahraga berdasarkan kata kunci dan filter.
+
 Fitur Utama:
 - Pencarian berdasarkan kata kunci.
 - Filter berdasarkan olahraga, lokasi, dan harga (berbayar atau gratis).
@@ -48,8 +52,10 @@ Fitur Utama:
 Integrasi: Terkoneksi dengan modul Place dan Hot Deals.
 
 
-- 🏟️ Place (Modul Tempat Olahraga)
-Mengelola data tempat olahraga dan menampilkan rincian informasi tempat seperti fasilitas, deskripsi, lokasi, dan mengintegrasikannya dengan google maps.
+
+
+🏟️ Place (Modul Tempat Olahraga)
+-> Mengelola data tempat olahraga dan menampilkan rincian informasi tempat seperti fasilitas, deskripsi, lokasi, dan mengintegrasikannya dengan google maps.
 
 Fitur Utama:
 - Menyimpan data tempat olahraga (lokasi, fasilitas, deskripsi, harga jika berbayar).
@@ -60,8 +66,9 @@ Fitur Utama:
 Integrasi: Terkoneksi dengan Search, Wishlist, dan Review, Place, Search, dan Hot Deals.
 
 
-- ⭐ Wishlist (Modul Daftar Favorit)
-Mengizinkan pengguna untuk menyimpan tempat olahraga favorit mereka agar dapat dengan mudah diakses di kemudian hari.
+
+⭐ Wishlist (Modul Daftar Favorit)
+-> Mengizinkan pengguna untuk menyimpan tempat olahraga favorit mereka agar dapat dengan mudah diakses di kemudian hari.
 
 Fitur Utama:
 - Menyimpan tempat pada card wishlist yang dimana card tersebut bisa diberikan keterangan sesuai preferensi mereka.
@@ -70,8 +77,8 @@ Fitur Utama:
 Integrasi: Terkoneksi dengan Place dan Auth & Profile.
 
 
-- 👍 Review (Modul Ulasan dan Rating)
-Pengguna dapat memberikan rating dan review pada tempat olahraga yang mereka kunjungi untuk membantu pengguna lain dalam memilih tempat terbaik namun dengan
+👍 Review (Modul Ulasan dan Rating)
+-> Pengguna dapat memberikan rating dan review pada tempat olahraga yang mereka kunjungi untuk membantu pengguna lain dalam memilih tempat terbaik namun dengan
 syarat pengguna tersebut harus sudah login. 
 
 Fitur Utama:
@@ -82,21 +89,18 @@ Fitur Utama:
 Integrasi: Terkoneksi dengan Place dan Auth & Profile.
 
 
-- 🏋️‍♂️Trainer Booking (Modul Pemesanan Trainer)
-Memungkinkan pengguna untuk melihat daftar trainer yang available di suatu tempat beserta specialities mereka dan melakukan booking sesi olahraga dengan mereka.
+
+🏋️‍♂️Trainer Booking (Modul Pemesanan Trainer)
+-> Memungkinkan pengguna untuk melihat daftar trainer yang available di suatu tempat beserta specialities mereka dan melakukan booking sesi olahraga dengan mereka.
 Pengguna juga bisa melihat trainer yang available di jam tertentu. 
 
 Fitur utama: 
-- A. User (Pengguna Biasa)
 - Melihat daftar trainer beserta spesialisasi, rating, dan jadwal tersedia.
 - Memilih tanggal, jam, durasi, dan jenis latihan untuk sesi training.
 - Membuat, mengubah, atau membatalkan booking sesi mereka sendiri.
-- Menyimpan riwayat booking (status: pending, selesai, dibatalkan).
 - Memberikan review dan rating untuk trainer setelah sesi selesai.
-
-- B. Admin
-- Melihat seluruh booking yang dibuat oleh user.
-- Mengatur jadwal trainer (menambah slot baru, mengubah atau menonaktifkan slot).
+- Melihat seluruh booking yang dibuat oleh user (admin)
+- Mengatur jadwal trainer (menambah slot baru, mengubah atau menonaktifkan slot) (admin)
 - Membatalkan booking jika ada konflik atau masalah.
 - Memantau dan mengelola review yang diberikan user.
 
