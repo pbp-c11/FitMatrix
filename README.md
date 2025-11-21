@@ -16,18 +16,18 @@ yang ada ke dalam wishlist serta memberi review setelah merasakan pengalaman ber
 👥 Jenis Pengguna
 1. User(biasa) – ditargetkan pada sebagian besar Sport Enthusiast.
 User ini ditargetkan pada sebagian besar Sport Enthusiast yang butuh referensi tempat yang bervariasi, baik yang berbayar maupun gratis. Mereka bisa memanfaatkan fitur-fitur di aplikasi kami:
-🎯 Filter berdasarkan cabang olahraga
-📍 Filter berdasarkan lokasi
-⭐ Menyimpan tempat olahraga ke wishlist
-👍 Melakukan review tempat olahraga
-🔥 Mendapatkan rekomendsi Trending Coordinates
-🤝 Melakukan booking appointment Personal trainer/Coach
+- 🎯 Filter berdasarkan cabang olahraga
+- 📍 Filter berdasarkan lokasi
+- ⭐ Menyimpan tempat olahraga ke wishlist
+- 👍 Melakukan review tempat olahraga
+- 🔥 Mendapatkan rekomendsi Trending Coordinates
+- 🤝 Melakukan booking appointment Personal trainer/Coach
 
 2. Admin
 Admin bertugas mengelola data di aplikasi:
-➕ Menambah lokasi spot olahraga & personal trainer/coach di Jabodetabek
-✏️ Mengedit dan menghapus data spot olahraga & trainer
-❌ Cancel appointment PT/Coach
+- ➕ Menambah lokasi spot olahraga & personal trainer/coach di Jabodetabek
+- ✏️ Mengedit dan menghapus data spot olahraga & trainer
+- ❌ Cancel appointment PT/Coach
 
 ## 2. Daftar Modul / Fitur (sesuai diagram)
 
