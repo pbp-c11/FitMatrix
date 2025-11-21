@@ -10,7 +10,7 @@
 
 ## Deskripsi Aplikasi 📱
 🏋️‍♂️ FitMatrix
-FitMatrix adalah aplikasi yang membantu khalayak untuk menemukan rekomendasi tempat olahraga 🏟️ di wilayah Jabodetabek, baik yang berbayar 💳 maupun gratis 🎉dan memungkinkan mereka untuk menyimpan tempat favorit sesuai preferensi mereka dari rekomendasi
+FitMatrix adalah aplikasi yang membantu khalayak untuk menemukan rekomendasi tempat olahraga 🏟️ di wilayah Jabodetabek, baik yang berbayar maupun gratis dan memungkinkan mereka untuk menyimpan tempat favorit sesuai preferensi mereka dari rekomendasi
 yang ada ke dalam wishlist serta memberi review setelah merasakan pengalaman berolahraga langsung di tempat. Selain itu, FitMatrix juga membantu user untuk menemukan rekomendasi personal trainer/ coach dan membooking sesi bersama mereka.
 
 👥 Jenis Pengguna
