@@ -28,7 +28,7 @@ User ini ditargetkan pada sebagian besar Sport Enthusiast yang butuh referensi t
 - ❌ Cancel appointment PT/Coach
 
 ## Daftar Modul 🗂️
-👥 Auth & Profile (Modul Autentikasi dan Profil Pengguna)
+# 👥 Auth & Profile (Modul Autentikasi dan Profil Pengguna)
 -> Modul ini mengelola registrasi, login, dan profil pengguna. Pengguna yang sudah login dapat mengelola data pribadi mereka, serta mengakses fitur-fitur lain seperti add tempat ke wishlist dan memberikan review suatu tempat.
 
 Fitur Utama:
@@ -36,11 +36,10 @@ Fitur Utama:
 - Mengelola profile pengguna (nama, foto profile, password)
 - Menyimpan riwayat aktivitas booking apppointment dengan PT/ trainer (baik appointment ongoing maupun yang sudah selesai).
 
-Integrasi: Terkoneksi dengan modul Wishlist, Review, dan Appointment.
+Integrasi -> Terkoneksi dengan modul Wishlist, Review, dan Appointment.
 
 
-
-🔍 Search (Modul Pencarian)
+# 🔍 Search (Modul Pencarian)
 -> Memudahkan pengguna mencari tempat olahraga berdasarkan kata kunci dan filter.
 
 Fitur Utama:
@@ -52,8 +51,7 @@ Integrasi: Terkoneksi dengan modul Place dan Hot Deals.
 
 
 
-
-🏟️ Place (Modul Tempat Olahraga)
+# 🏟️ Place (Modul Tempat Olahraga)
 -> Mengelola data tempat olahraga dan menampilkan rincian informasi tempat seperti fasilitas, deskripsi, lokasi, dan mengintegrasikannya dengan google maps.
 
 Fitur Utama:
@@ -66,7 +64,7 @@ Integrasi: Terkoneksi dengan Search, Wishlist, dan Review, Place, Search, dan Ho
 
 
 
-⭐ Wishlist (Modul Daftar Favorit)
+# ⭐ Wishlist (Modul Daftar Favorit)
 -> Mengizinkan pengguna untuk menyimpan tempat olahraga favorit mereka agar dapat dengan mudah diakses di kemudian hari.
 
 Fitur Utama:
@@ -76,7 +74,7 @@ Fitur Utama:
 Integrasi: Terkoneksi dengan Place dan Auth & Profile.
 
 
-👍 Review (Modul Ulasan dan Rating)
+# 👍 Review (Modul Ulasan dan Rating)
 -> Pengguna dapat memberikan rating dan review pada tempat olahraga yang mereka kunjungi untuk membantu pengguna lain dalam memilih tempat terbaik namun dengan
 syarat pengguna tersebut harus sudah login. 
 
@@ -89,7 +87,7 @@ Integrasi: Terkoneksi dengan Place dan Auth & Profile.
 
 
 
-🏋️‍♂️Trainer Booking (Modul Pemesanan Trainer)
+# 🏋️‍♂️Trainer Booking (Modul Pemesanan Trainer)
 -> Memungkinkan pengguna untuk melihat daftar trainer yang available di suatu tempat beserta specialities mereka dan melakukan booking sesi olahraga dengan mereka.
 Pengguna juga bisa melihat trainer yang available di jam tertentu. 
 
@@ -103,10 +101,7 @@ Fitur utama:
 - Membatalkan booking jika ada konflik atau masalah.
 - Memantau dan mengelola review yang diberikan user.
 
-Integrasi
-Auth & Profile: untuk identifikasi pengguna dan akses sesuai role.
-Review: untuk menampilkan dan mengelola rating/trainer feedback.
-Place / Search: jika sesi dilakukan di lokasi tertentu (misal gym atau lapangan tertentu).
+Integrasi Terkoneksi dengan Auth & Profile, Review, Place, dan Search
 
 
 # 🎨 Link Figma: 
