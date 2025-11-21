@@ -1,7 +1,6 @@
 # README.md TK PBP C11
 
 # Daftar Anggota Kelompok TK-PBP C11
-List Nama:
 - Dhea Anggrayningsih Syah Rony 2406437262 - Modul Review
 - Gregorius Ega Aditama Sudjali 2406434153 - Modul Authentication
 - kanayra maritza sanika adeeva 2406437880 - Modul Wishlist
@@ -10,23 +9,25 @@ List Nama:
 - Marvel Irawan 2406421346 - Modul Search
 
 ## 1. Deskripsi Aplikasi 
-Nama Aplikasi : FitMatrix
-Deskripsi Aplikasi: platform yang membantu pengguna menemukan rekomendasi tempat olahraga, baik yang berbayar maupun gratis (misalnya track lari, gym, atau lapangan olahraga) di wilayah Jabodetabek. Pengguna dapat memfilter tempat berdasarkan cabang olahraga dan lokasi, menyimpan tempat favorit ke wishlist, serta melihat tempat populer (Hot Places) dan promosi (Hot Deals). Tujuan aplikasi ini adalah mempermudah masyarakat untuk menemukan sarana olahraga sesuai kebutuhan dan preferensi mereka serta mencari dan melakukan appointment  personal trainer/coach (fitur tambahan).
+🏋️‍♂️ FitMatrix
+FitMatrix adalah aplikasi yang membantu khalayak untuk menemukan rekomendasi tempat olahraga 🏟️ di wilayah Jabodetabek, baik yang berbayar 💳 maupun gratis 🎉dan memungkinkan mereka untuk menyimpan tempat favorit sesuai preferensi mereka dari rekomendasi
+yang ada ke dalam wishlist serta memberi review setelah merasakan pengalaman berolahraga langsung di tempat. Selain itu, FitMatrix juga membantu user untuk menemukan rekomendasi personal trainer/ coach dan membooking sesi bersama mereka.
 
-Jenis pengguna: 
+👥 Jenis Pengguna
 1. User(biasa) – ditargetkan pada sebagian besar Sport Enthusiast.
-User ini adalah individu yang tertarik dengan aktivitas olahraga dan ingin menemukan tempat olahraga di sekitar wilayah mereka. Mereka butuh referensi tempat yang bervariasi, baik yang berbayar maupun gratis, serta memanfaatkan fitur-fitur berikut untuk memilih lokasi olahraga yang sesuai dengan preferensi mereka:
-- Filter berdasarkan cabang olahraga dan lokasi
-- Menyimpan tempat favorit ke wishlist
-- Memberikan review dan likes pada tempat olahraga
-- Melihat tempat populer (Hot Places) dan promosi (Hot Deals)
-- Melakukan appointment  personal trainer/coach (fitur tambahan)
+User ini ditargetkan pada sebagian besar Sport Enthusiast yang butuh referensi tempat yang bervariasi, baik yang berbayar maupun gratis. Mereka bisa memanfaatkan fitur-fitur di aplikasi kami:
+🎯 Filter berdasarkan cabang olahraga
+📍 Filter berdasarkan lokasi
+⭐ Menyimpan tempat olahraga ke wishlist
+👍 Melakukan review tempat olahraga
+🔥 Mendapatkan rekomendsi Trending Coordinates
+🤝 Melakukan booking appointment Personal trainer/Coach
 
 2. Admin
-- Menambah daftar lokasi spot olahraga dan personal trainer/coach di Jabodetabek
-- Bisa mengedit dan mendelete lokasi spot olahraga dan personal trainer/coach
-- Cancel appointment PT/coach
-
+Admin bertugas mengelola data di aplikasi:
+➕ Menambah lokasi spot olahraga & personal trainer/coach di Jabodetabek
+✏️ Mengedit dan menghapus data spot olahraga & trainer
+❌ Cancel appointment PT/Coach
 
 ## 2. Daftar Modul / Fitur (sesuai diagram)
 
