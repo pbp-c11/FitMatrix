@@ -2,17 +2,45 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from datetime import timedelta
 
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+PRODUCTION = os.getenv("PRODUCTION", "false").lower() == "true"
+
+
+def _load_secret_key() -> str:
+    """Ensure a stable secret key so sessions remain valid across workers."""
+    env_key = os.getenv("DJANGO_SECRET_KEY")
+    if env_key:
+        return env_key
+
+    key_file = BASE_DIR / ".django_secret_key"
+    if key_file.exists():
+        return key_file.read_text().strip()
+
+    if PRODUCTION:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when PRODUCTION=true")
+
+    generated_key = get_random_secret_key()
+    try:
+        key_file.write_text(generated_key)
+    except OSError:
+        pass
+    return generated_key
+
+
+SECRET_KEY = _load_secret_key()
 DEBUG = os.getenv("DJANGO_DEBUG", "false").lower() == "false"
 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
+    "10.0.2.2",
+    "testserver",
     "3l2lkyxcstmm7g-8000.proxy.runpod.net",  # your RunPod proxy host
     ".proxy.runpod.net",                      # wildcard for other RunPod proxy hosts
     "100.65.28.156",                          # your pod/private IP if you need it
@@ -22,7 +50,19 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://3l2lkyxcstmm7g-8000.proxy.runpod.net",
     "https://*.proxy.runpod.net",  # optional wildcard (Django 4.1+ supports *)
+    "http://10.0.2.2:8000",
+    "http://127.0.0.1:8000",
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+CORS_ALLOW_ALL_ORIGINS = True # For development ease, can be removed in production
+
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_COOKIE_SECURE = True
@@ -37,23 +77,29 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "rest_framework",
+    "rest_framework_simplejwt",
     "accounts",
     "search",
     "places",
     "scheduling",
     "wishlist",
     "reviews",
+    "api",
+    "corsheaders"
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware"
 ]
 
 ROOT_URLCONF = "fitmatrix.urls"
@@ -76,7 +122,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "fitmatrix.wsgi.application"
 
-if os.getenv("PRODUCTION", "false").lower() == "true":
+if PRODUCTION:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -140,3 +186,21 @@ LOGIN_REDIRECT_URL = "accounts:profile"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.AllowAny",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": None,
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}

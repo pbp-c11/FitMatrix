@@ -42,6 +42,10 @@ class User(AbstractUser):
         if not self.display_name:
             full_name = self.get_full_name().strip()
             self.display_name = full_name or self.username
+        if self.role == self.Roles.ADMIN:
+            self.is_staff = True
+        elif not self.is_superuser:
+            self.is_staff = False
         self.full_clean()
         super().save(*args, **kwargs)
 

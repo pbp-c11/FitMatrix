@@ -5,9 +5,11 @@ from django.urls import include, path
 
 from accounts import views as account_views
 from .views import home_view
+from places.views import proxy_image
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
+    path('proxy-image/', proxy_image, name='proxy_image'),
     path("", home_view, name="home"),
     path("accounts/", include("accounts.urls")),
     path("search/", include("search.urls")),
@@ -15,6 +17,7 @@ urlpatterns = [
     path("scheduling/", include("scheduling.urls")),
     path("reviews/", include("reviews.urls")),
     path("wishlist/", include("wishlist.urls")),
+    path("api/", include("api.urls")),
     path("admin/console/", account_views.admin_console_view, name="admin-console"),
     path("admin/places/", account_views.admin_places_list, name="admin-places"),
     path("admin/places/new/", account_views.admin_place_create, name="admin-place-create"),
