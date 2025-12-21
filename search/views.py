@@ -41,7 +41,7 @@ def results_view(request: HttpRequest) -> HttpResponse:
         amenities=amenities or None,
     )
     if sort == "newest":
-        places = places.order_by("-created_at")
+        places = places.order_by("-created_at", "-id")
     elif sort == "rating":
         places = places.order_by("-rating_avg", "-likes")
 

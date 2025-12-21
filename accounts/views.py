@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
-from reviews.models import Review
+from reviews.models import TrainerReview
 from scheduling.forms import SessionSlotForm, TrainerForm
 from scheduling.models import Booking, SessionSlot, Trainer
 from places.models import Place
@@ -247,7 +247,7 @@ def profile_view(request):
         .order_by("-created_at")
     )
     wishlist_page = Paginator(wishlist_qs, 12).get_page(request.GET.get("wishlist_page"))
-    reviews = Review.objects.filter(user=request.user).select_related("trainer")
+    reviews = TrainerReview.objects.filter(user=request.user).select_related("trainer")
     profile_form = ProfileForm(instance=request.user)
     password_form = AccessiblePasswordChangeForm(user=request.user)
     return render(
@@ -481,14 +481,14 @@ def admin_booking_cancel(request, pk):
 
 @user_passes_test(is_admin)
 def admin_reviews_list(request):
-    reviews = Review.objects.select_related("trainer", "user", "booking")
+    reviews = TrainerReview.objects.select_related("trainer", "user", "booking")
     return render(request, "accounts/admin/reviews_list.html", {"reviews": reviews})
 
 
 @user_passes_test(is_admin)
 @require_POST
 def admin_review_toggle(request, pk):
-    review = get_object_or_404(Review, pk=pk)
+    review = get_object_or_404(TrainerReview, pk=pk)
     review.is_visible = not review.is_visible
     review.save(update_fields=["is_visible"])
     messages.info(request, "Review visibility updated.")

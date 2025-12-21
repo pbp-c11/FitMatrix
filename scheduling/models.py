@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from django.db.models import Q
 
 
 class Trainer(models.Model):
@@ -17,9 +18,31 @@ class Trainer(models.Model):
     calendly_url = models.URLField(blank=True)
     rating_avg = models.FloatField(default=0)
     is_active = models.BooleanField(default=True)
+    # Scheduling fields
+    place = models.ForeignKey(
+        "places.Place",
+        related_name="trainers",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
 
     class Meta:
         ordering = ["name"]
+
+    @property
+    def is_available(self) -> bool:
+        """Check if trainer is available based on start/end dates."""
+        if not self.is_active:
+            return False
+        today = timezone.now().date()
+        if self.start_date and today < self.start_date:
+            return False
+        if self.end_date and today > self.end_date:
+            return False
+        return True
 
     def __str__(self) -> str:
         return self.name
@@ -58,26 +81,50 @@ class Booking(models.Model):
         CANCELLED = "CANCELLED", "Cancelled"
         COMPLETED = "COMPLETED", "Completed"
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="bookings", on_delete=models.CASCADE)
-    slot = models.ForeignKey(SessionSlot, related_name="bookings", on_delete=models.CASCADE)
-    status = models.CharField(max_length=16, choices=Status.choices, default=Status.BOOKED)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="bookings",
+        on_delete=models.CASCADE,
+    )
+    slot = models.ForeignKey(
+        SessionSlot,
+        related_name="bookings",
+        on_delete=models.CASCADE,
+    )
+    status = models.CharField(
+        max_length=16,
+        choices=Status.choices,
+        default=Status.BOOKED,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("user", "slot")
         ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "slot"],
+                condition=Q(status="BOOKED"),
+                name="unique_active_booking_per_user_slot",
+            )
+        ]
 
     def clean(self) -> None:
         super().clean()
         if self.slot and self.status == self.Status.BOOKED:
-            qs = Booking.objects.filter(slot=self.slot, status=self.Status.BOOKED)
+            qs = Booking.objects.filter(
+                slot=self.slot,
+                status=self.Status.BOOKED,
+            )
             if self.pk:
                 qs = qs.exclude(pk=self.pk)
-            if qs.count() >= self.slot.capacity:
-                raise ValidationError({"slot": "This session is already fully booked."})
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+            if qs.count() >= self.slot.capacity:
+                raise ValidationError(
+                    {"slot": "This session is already fully booked."}
+                )
+
+    def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -85,8 +132,7 @@ class Booking(models.Model):
         if self.status == self.Status.CANCELLED:
             return
         self.status = self.Status.CANCELLED
-        setattr(self, "_cancelled_by_admin", by_admin)
         self.save(update_fields=["status", "updated_at"])
 
-    def __str__(self) -> str:
-        return f"Booking({self.user} -> {self.slot})"
+    def __str__(self):
+        return f"Booking({self.user} -> {self.slot} [{self.status}])"

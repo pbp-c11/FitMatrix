@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from places.models import Place
-from reviews.models import Review
+from reviews.models import TrainerReview
 from scheduling.models import Booking, SessionSlot, Trainer
 
 User = get_user_model()
@@ -39,7 +39,7 @@ class ReviewVisibilityTests(TestCase):
         self.booking = Booking.objects.create(user=self.user, slot=self.slot)
 
     def test_visibility_toggle_updates_rating(self) -> None:
-        review = Review.objects.create(
+        review = TrainerReview.objects.create(
             booking=self.booking,
             user=self.user,
             trainer=self.trainer,
@@ -65,14 +65,14 @@ class ReviewVisibilityTests(TestCase):
             password="StrongPass123!",
         )
         other_booking = Booking.objects.create(user=other_user, slot=self.slot)
-        first = Review.objects.create(
+        first = TrainerReview.objects.create(
             booking=self.booking,
             user=self.user,
             trainer=self.trainer,
             rating=5,
             comment="Great",
         )
-        second = Review.objects.create(
+        second = TrainerReview.objects.create(
             booking=other_booking,
             user=other_user,
             trainer=self.trainer,
